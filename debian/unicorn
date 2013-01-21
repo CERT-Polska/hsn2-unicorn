@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Starts HSN2 Unicorn
+
+UNI_HOME=/opt/hsn2/unicorn
+
+if [ -z "`which java`" ]; then
+        echo "JAVA need to be installed first!"
+        exit 1
+fi
+
+java -jar ${UNI_HOME}/hsn2-unicorn.jar "$@"
