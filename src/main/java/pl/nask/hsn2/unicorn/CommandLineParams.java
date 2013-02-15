@@ -59,7 +59,7 @@ public class CommandLineParams {
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("Job descriptor flood");
 		optionGroup.addOption(OptionBuilder.create("jdf"));
-		
+
 		OptionBuilder.withLongOpt("jobList");
 		OptionBuilder.withDescription("Job list");
 		optionGroup.addOption(OptionBuilder.create("jl"));
@@ -139,7 +139,8 @@ public class CommandLineParams {
 		OptionBuilder.withArgName("jobId");
 		OptionBuilder.withLongOpt("objectStoreJobClean");
 		OptionBuilder.hasArg();
-		OptionBuilder.withDescription("Sends JobFinished message. As a result of this msg ObjectStore will clean all data with given jobId.");
+		OptionBuilder
+				.withDescription("Sends JobFinished message. As a result of this msg ObjectStore will clean all data with given jobId.");
 		optionGroup.addOption(OptionBuilder.create("osjc"));
 
 		OptionBuilder.withLongOpt("help");
@@ -156,6 +157,14 @@ public class CommandLineParams {
 		OptionBuilder.hasArg();
 		OptionBuilder.withDescription("checking status of job");
 		optionGroup.addOption(OptionBuilder.create("status"));
+
+		OptionBuilder.withArgName("actionType[id|w] param [loopCount]");
+		OptionBuilder.hasArgs();
+		OptionBuilder.withValueSeparator(' ');
+		OptionBuilder
+				.withDescription("When action type is 'id' it monitors job and starts new if it ends. When type is 'w' it starts new job, monitors it and starts new if it ends. Loop count defines how many time to repeat (infinit loop if nothing provided).");
+		OptionBuilder.withLongOpt("jobDescriptorLooped");
+		optionGroup.addOption(OptionBuilder.create("jdl"));
 
 		options.addOptionGroup(optionGroup);
 

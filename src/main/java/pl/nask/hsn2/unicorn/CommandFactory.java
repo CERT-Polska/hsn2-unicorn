@@ -36,6 +36,7 @@ import pl.nask.hsn2.unicorn.commands.GetWorkflowCommand;
 import pl.nask.hsn2.unicorn.commands.ImportCommand;
 import pl.nask.hsn2.unicorn.commands.JobDescriptorCommand;
 import pl.nask.hsn2.unicorn.commands.JobDescriptorFloodCommand;
+import pl.nask.hsn2.unicorn.commands.JobDescriptorLoopedCommand;
 import pl.nask.hsn2.unicorn.commands.JobInfoCommand;
 import pl.nask.hsn2.unicorn.commands.JobListCommand;
 import pl.nask.hsn2.unicorn.commands.ListWorkflowCommand;
@@ -166,6 +167,50 @@ public final class CommandFactory {
 			return command;
 		} else if(cmd.hasOption("osjc")) {
 			return new CleanJobDataCommand(cmdParams.getOsQueueName(), new Long(cmd.getOptionValue("osjc")));
+		} else if(cmd.hasOption("jdl")) {
+			// Get additional arguments.
+			String[] options = cmd.getOptionValues("jdl");
+			
+			// Check for arguments number.
+			if (options.length != 2 && options.length != 3) {
+				throw new IllegalStateException("Wrong number of arguments for -jdl option. " + options.toString());
+			}
+			
+			// Parse arguments.
+			String actionType = options[0];
+			long loopCount = 0;
+			
+			// If provided, 3rd argument should be positive number.
+			if (options.length == 3) {
+				try {
+					loopCount = Long.valueOf(options[2]);
+					if (loopCount < 1) {
+						throw new NumberFormatException();
+					}
+				} catch (NumberFormatException e) {
+					throw new IllegalStateException("Third argument for -jdl option should be positive number. Provided: " + options[2]);
+				}
+			}
+			
+			// 1st argument should be 'id' or 'w' only.
+			if ("id".equals(actionType)) {
+				try {
+					// 1st argument is 'id', 2nd argument has to be positive number.
+					long jobId = Long.parseLong(options[1]);
+					if (jobId < 1) {
+						throw new NumberFormatException();
+					}
+					return new JobDescriptorLoopedCommand(cmdParams.getFrameworkQueueName(), cmdParams.getOsQueueName(), jobId, loopCount);
+				} catch (NumberFormatException e) {
+					throw new IllegalStateException("Third argument for -jdl option should be positive number. Provided: " + options[1]);
+				}
+			} else if ("w".equals(actionType)) {
+				// 1st argument is 'w'.
+				return new JobDescriptorLoopedCommand(cmdParams.getFrameworkQueueName(), cmdParams.getOsQueueName(), options[1], loopCount);
+			} else {
+				// Wrong 1st argument.
+				throw new IllegalStateException("First argument for -jdl option should be 'id' or 'w'. Provided: " + actionType);
+			}
 		}
 		else{
 			throw new IllegalStateException("Unknown command");
