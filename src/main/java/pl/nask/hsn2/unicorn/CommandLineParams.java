@@ -158,11 +158,11 @@ public class CommandLineParams {
 		OptionBuilder.withDescription("checking status of job");
 		optionGroup.addOption(OptionBuilder.create("status"));
 
-		OptionBuilder.withArgName("actionType[id|w] param [loopCount]");
+		OptionBuilder.withArgName("action[id|w] param count [interval]");
 		OptionBuilder.hasArgs();
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder
-				.withDescription("When action type is 'id' it monitors job and starts new if it ends. When type is 'w' it starts new job, monitors it and starts new if it ends. Loop count defines how many time to repeat (infinit loop if nothing provided).");
+				.withDescription("When action type is 'id' it monitors job and starts new if it ends. When type is 'w' it starts new job, monitors it and starts new if it ends. Count defines how many time to repeat job. Time interval defines sleep between checks in seconds (10s if nothing provided).");
 		OptionBuilder.withLongOpt("jobDescriptorLooped");
 		optionGroup.addOption(OptionBuilder.create("jdl"));
 

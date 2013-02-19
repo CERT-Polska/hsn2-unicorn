@@ -19,8 +19,16 @@
 
 package pl.nask.hsn2.unicorn.commands;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
+
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import pl.nask.hsn2.protobuff.Info.InfoData;
 import pl.nask.hsn2.protobuff.Info.InfoError;
@@ -35,8 +43,10 @@ import pl.nask.hsn2.protobuff.Service.Parameter;
 import pl.nask.hsn2.protobuff.Service.ServiceConfig;
 import pl.nask.hsn2.unicorn.FailedCommandException;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
+import pl.nask.hsn2.unicorn.connector.JobErrorException;
 import pl.nask.hsn2.unicorn.connector.Request;
 import pl.nask.hsn2.unicorn.connector.Response;
+import pl.nask.hsn2.unicorn.connector.UnicornUtils;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -44,37 +54,44 @@ public class JobDescriptorLoopedCommand extends AbstractCommand {
 	private Long jobId;
 	private String workflowName;
 	private long loopCount;
-	private final boolean isLoopCountEnabled;
-	private final String osQueueName;
 	private final String fwQueueName;
+	private Map<String, String> previousDisplayValues;
+	private String[] serviceParams = null;
+	/**
+	 * Sleep time in miliseconds.
+	 */
+	private final long sleepTime;
 
-	public JobDescriptorLoopedCommand(String fwQueueName, String osQueueName, String workflowName, Long jobId, long loopCount)
+	private JobDescriptorLoopedCommand(String fwQueueName, String workflowName, Long jobId, long loopCount, Long sleepTime)
 			throws ConnectionException {
+		if (jobId != null && jobId < 1) {
+			throw new RuntimeException("Job id should be positive number.");
+		}
+		if (loopCount < 1) {
+			throw new RuntimeException("Loop count id should be positive number.");
+		}
+		if (sleepTime != null && sleepTime < 1) {
+			throw new RuntimeException("Sleep time id should be positive number.");
+		}
+
 		this.fwQueueName = fwQueueName;
-		this.osQueueName = osQueueName;
 		this.workflowName = workflowName;
 		this.jobId = jobId;
-		if (loopCount > 0) {
-			this.loopCount = loopCount;
-			this.isLoopCountEnabled = true;
-		} else {
-			this.loopCount = 1;
-			this.isLoopCountEnabled = false;
-		}
+		this.loopCount = loopCount;
+		this.sleepTime = (sleepTime == null ? 10 : sleepTime) * 1000;
 		connector.connectRPC();
+		LOGGER.info(
+				"Created JobDescriptorLooped command.\nQueue name = {}\nWorkflow name = {}\nJob id = {}\nLoop count = {}\nSleep time = {} sec.\n",
+				new Object[] { fwQueueName, workflowName == null ? "n/a" : workflowName, jobId == null ? "n/a" : jobId, loopCount,
+						sleepTime == null ? "10" : sleepTime });
 	}
 
-	public JobDescriptorLoopedCommand(String fwQueueName, String osQueueName, String workflowName, long loopCount)
-			throws ConnectionException {
-		this(fwQueueName, osQueueName, workflowName, null, loopCount);
-		LOGGER.info("Created JobDescriptorLooped command.\nOS queue name = {}\nWorkflow = {}\nLoop count = {}", new Object[] { osQueueName,
-				workflowName, loopCount > 0 ? "" + loopCount : "infinite" });
+	public JobDescriptorLoopedCommand(String fwQueueName, String workflowName, long loopCount, Long sleepTime) throws ConnectionException {
+		this(fwQueueName, workflowName, null, loopCount, sleepTime);
 	}
 
-	public JobDescriptorLoopedCommand(String fwQueueName, String osQueueName, long jobId, long loopCount) throws ConnectionException {
-		this(fwQueueName, osQueueName, null, jobId, loopCount);
-		LOGGER.info("Created JobDescriptorLooped command.\nOS queue name = {}\nJob id = {}\nLoop count = {}", new Object[] { osQueueName,
-				jobId, loopCount > 0 ? "" + loopCount : "infinite" });
+	public JobDescriptorLoopedCommand(String fwQueueName, long jobId, long loopCount, Long sleepTime) throws ConnectionException {
+		this(fwQueueName, null, jobId, loopCount, sleepTime);
 	}
 
 	@Override
@@ -92,23 +109,38 @@ public class JobDescriptorLoopedCommand extends AbstractCommand {
 
 		// Monitor current job status.
 		while (loopCount > 0) {
-			LOGGER.info("==========");
-
 			// Check for job status.
-			checkForJobStatus(jobId);
+			boolean isJobFinished = false;
+			try {
+				isJobFinished = checkForJobStatus(jobId);
+			} catch (InvalidProtocolBufferException e1) {
+				LOGGER.info("Couldn't parse protobuf message", e1);
+				break;
+			} catch (JobErrorException e) {
+				LOGGER.info("Job doesn't exist.", e);
+				break;
+			}
 
 			// Check if job is completed.
-
-			// If job is completed, start new one.
-
-			// Update loop count.
-			if (isLoopCountEnabled) {
+			if (isJobFinished) {
+				// Update loop count.
 				loopCount--;
+				if (loopCount == 0) {
+					break;
+				}
+
+				// Start new job.
+				try {
+					jobId = startNewJob(workflowName);
+				} catch (IllegalStateException e) {
+					LOGGER.debug("Can't start new job, rejected.\n{}", e);
+					throw new FailedCommandException("Can't start new job, rejected.");
+				}
 			}
 
 			// Go to sleep.
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(sleepTime);
 			} catch (InterruptedException e) {
 				// Should never happen.
 				LOGGER.debug("Sleep interrupted.");
@@ -152,26 +184,104 @@ public class JobDescriptorLoopedCommand extends AbstractCommand {
 		return jobId;
 	}
 
-	private void checkForJobStatus(long jobId) throws ConnectionException, FailedCommandException {
-		LOGGER.info("Check job info, id={}", jobId);
+	private boolean checkForJobStatus(long jobId) throws ConnectionException, FailedCommandException, InvalidProtocolBufferException,
+			JobErrorException {
 		InfoRequest infoRequest = InfoRequest.newBuilder().setType(InfoType.JOB).setId(jobId).build();
 		Request request = new Request(fwQueueName, "InfoRequest", infoRequest.toByteArray());
 		connector.send(request);
 		Response response = connector.receive();
 
-		// WST poprawic wyswietlanie
-		displayResults(response);
+		// Extract data from response.
+		boolean isJobFinished = false;
+		String type = response.getType();
+		Map<String, String> displayValues = new TreeMap<>();
+		displayValues.put("_job_id", "" + jobId);
+		if ("InfoData".equals(type)) {
+			InfoData data = InfoData.parseFrom(response.getBody());
+			ObjectData objData = data.getData();
+			for (Attribute attr : objData.getAttrsList()) {
+				String attrName = attr.getName();
+				String attrValue = UnicornUtils.getValueStringRepresentation(attr);
+				if (workflowName == null && "job_workflow_name".equals(attrName)) {
+					workflowName = attrValue;
+				}
+				if (serviceParams == null && "job_custom_params".equals(attrName)) {
+					serviceParams = parseServiceParameters(attrValue);
+				}
+				displayValues.put(attrName, attrValue);
+				if ("job_status".equals(attrName)
+						&& ("COMPLETED".equals(attrValue) || "FAILED".equals(attrValue) || "CANCELLED".equals(attrValue))) {
+					isJobFinished = true;
+				}
+			}
+		} else if ("InfoError".equals(type)) {
+			InfoError err = InfoError.parseFrom(response.getBody());
+			throw new JobErrorException("Job error: " + err.getReason());
+		} else {
+			displayValues.put("WRONG MSG TYPE", type);
+		}
+		displayResults(displayValues, !isJobFinished);
+		return isJobFinished;
+	}
+
+	private String[] parseServiceParameters(String parametersAsString) {
+		if ("{}".equals(parametersAsString)) {
+			return new String[] {};
+		}
+
+		List<String> params = new ArrayList<>();
+		JSONObject jsonServices = (JSONObject) JSONValue.parse(parametersAsString);
+		Iterator it = jsonServices.entrySet().iterator();
+		while (it.hasNext()) {
+			Object obj = it.next();
+			if (obj instanceof Entry) {
+				Entry entry = (Entry) obj;
+				String serviceName = (String) entry.getKey();
+				JSONObject jsonServiceParams = (JSONObject) entry.getValue();
+				Iterator it2 = jsonServiceParams.entrySet().iterator();
+				while (it2.hasNext()) {
+					Object obj2 = it2.next();
+					if (obj2 instanceof Entry) {
+						Entry entry2 = (Entry) obj2;
+						String paramName = (String) entry2.getKey();
+						String paramValue = (String) entry2.getValue();
+						params.add(serviceName + "." + paramName + "=" + paramValue);
+					}
+				}
+			}
+		}
+		return params.toArray(new String[0]);
+	}
+
+	protected void displayResults(Map<String, String> data, boolean briefInfo) {
+		if (isNewDataDifferentThatPrevious(data)) {
+			// Job info data changed since last time.
+			StringBuilder displayResults = new StringBuilder("JOB INFO\n");
+			for (Entry<String, String> entry : data.entrySet()) {
+				String name = entry.getKey();
+				if ((!briefInfo)
+						|| (briefInfo && !"_job_id".equals(name) && !"_job_id".equals(name) && !"job_active_step".equals(name)
+								&& !"job_custom_params".equals(name) && !"job_start_time".equals(name) && !"job_status".equals(name)
+								&& !"job_workflow_name".equals(name) && !"job_workflow_revision".equals(name))) {
+					displayResults.append(name).append(" = ").append(entry.getValue()).append("\n");
+				}
+			}
+			LOGGER.info(displayResults.toString());
+			previousDisplayValues = data;
+		} else {
+			// Job info data did not change since last time.
+			LOGGER.info("JOB INFO didn't change.");
+		}
 	}
 
 	private byte[] buildJobDescriptorMessage() {
 		JobDescriptor.Builder jobDescriptorBuilder = JobDescriptor.newBuilder().setWorkflow(workflowName);
 
-		// WST dodac obsluge service parameters, usunac nastepny wiersz
-		String[] serviceParams = {};
-
 		// Add service parameters.
-		for (String param : serviceParams) {
-			jobDescriptorBuilder.addConfig(prepareServiceConfig(param));
+		if (serviceParams != null) {
+			for (String param : serviceParams) {
+				jobDescriptorBuilder.addConfig(prepareServiceConfig(param));
+			}
 		}
 
 		return jobDescriptorBuilder.build().toByteArray();
@@ -188,65 +298,35 @@ public class JobDescriptorLoopedCommand extends AbstractCommand {
 		return configBuilder;
 	}
 
-	protected void displayResults(Response response) {
-		String type = response.getType();
-		StringBuilder displayResults = new StringBuilder("JOB INFO\n");
-		if ("InfoData".equals(type)) {
-			try {
-				Set<String> displayValues = new TreeSet<>();
-				InfoData data = InfoData.parseFrom(response.getBody());
-				ObjectData objData = data.getData();
-				for (Attribute attr : objData.getAttrsList()) {
-					displayValues.add(attr.getName() + " = " + getValueStringRepresentation(attr));
-				}
-				for (String s : displayValues) {
-					displayResults.append(s).append("\n");
-				}
-			} catch (InvalidProtocolBufferException e) {
-				// Should never happen.
-				displayResults.append("Could not deserialize response message").append(e);
-			}
-		} else if ("InfoError".equals(type)) {
-			try {
-				InfoError error = InfoError.parseFrom(response.getBody());
-				displayResults.append("Could not get job info: ").append(error.getReason());
-			} catch (InvalidProtocolBufferException e) {
-				// Should never happen.
-				displayResults.append("Could not deserialize response message").append(e);
-			}
+	/**
+	 * Checks if new job info data is different than previous one.
+	 * 
+	 * @param newData
+	 * @return True if new data is different than old. False if both are the same.
+	 */
+	private boolean isNewDataDifferentThatPrevious(Map<String, String> newData) {
+		boolean result = false;
+		if (previousDisplayValues == null || newData.size() != previousDisplayValues.size()) {
+			result = true;
 		} else {
-			displayResults.append("WRONG MSG TYPE: ").append(type);
-		}
-		LOGGER.info(displayResults.toString());
-	}
+			Set<Entry<String, String>> esNew = newData.entrySet();
+			Set<Entry<String, String>> esOld = previousDisplayValues.entrySet();
+			Iterator<Entry<String, String>> itOld = esOld.iterator();
+			Iterator<Entry<String, String>> itNew = esNew.iterator();
 
-	private String getValueStringRepresentation(final Attribute a) {
-		String s = "";
-		switch (a.getType()) {
-		case BOOL:
-			s += a.getDataBool();
-			break;
-		case INT:
-			s += a.getDataInt();
-			break;
-		case TIME:
-			s += a.getDataTime();
-			break;
-		case FLOAT:
-			s += a.getDataFloat();
-			break;
-		case STRING:
-			s += a.getDataString();
-			break;
-		case OBJECT:
-			s += a.getDataObject();
-			break;
-		case BYTES:
-			s += a.getDataBytes();
-			break;
-		default:
-			break;
+			while (itOld.hasNext()) {
+				Entry<String, String> entryOld = itOld.next();
+				Entry<String, String> entryNew = itNew.next();
+				if ("job_processing_time_sec".equals(entryNew.getKey())) {
+					continue;
+				}
+				if (!entryNew.getKey().equals(entryOld.getKey()) || !entryNew.getValue().equals(entryOld.getValue())) {
+					result = true;
+					break;
+				}
+			}
 		}
-		return s;
+
+		return result;
 	}
 }

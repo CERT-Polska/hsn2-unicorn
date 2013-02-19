@@ -30,6 +30,7 @@ import pl.nask.hsn2.protobuff.Object.Attribute;
 import pl.nask.hsn2.protobuff.Object.ObjectData;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Response;
+import pl.nask.hsn2.unicorn.connector.UnicornUtils;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -42,7 +43,7 @@ public class JobInfoCommand extends BasicRPCCommand {
 		super(REQUEST_TYPE, queueName);
 		this.jobId = jobId;
 	}
-	
+
 	@Override
 	protected void executeSpecyficJob() throws ConnectionException {
 		super.executeSpecyficJob();
@@ -64,7 +65,7 @@ public class JobInfoCommand extends BasicRPCCommand {
 				InfoData data = InfoData.parseFrom(response.getBody());
 				ObjectData objData = data.getData();
 				for (Attribute attr : objData.getAttrsList()) {
-					displayValues.add(attr.getName() + " = " + getValueStringRepresentation(attr));
+					displayValues.add(attr.getName() + " = " + UnicornUtils.getValueStringRepresentation(attr));
 				}
 				for (String s : displayValues) {
 					displayResults.append(s).append("\n");
@@ -85,35 +86,5 @@ public class JobInfoCommand extends BasicRPCCommand {
 			displayResults.append("WRONG MSG TYPE: ").append(type);
 		}
 		super.displayResults(displayResults.toString());
-	}
-
-	private String getValueStringRepresentation(final Attribute a) {
-		String s = "";
-		switch (a.getType()) {
-		case BOOL:
-			s += a.getDataBool();
-			break;
-		case INT:
-			s += a.getDataInt();
-			break;
-		case TIME:
-			s += a.getDataTime();
-			break;
-		case FLOAT:
-			s += a.getDataFloat();
-			break;
-		case STRING:
-			s += a.getDataString();
-			break;
-		case OBJECT:
-			s += a.getDataObject();
-			break;
-		case BYTES:
-			s += a.getDataBytes();
-			break;
-		default:
-			break;
-		}
-		return s;
 	}
 }
