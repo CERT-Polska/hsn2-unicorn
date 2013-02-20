@@ -20,9 +20,8 @@
 package pl.nask.hsn2.unicorn.commands;
 
 import pl.nask.hsn2.protobuff.Jobs.JobDescriptor;
-import pl.nask.hsn2.protobuff.Service.Parameter;
-import pl.nask.hsn2.protobuff.Service.ServiceConfig;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
+import pl.nask.hsn2.unicorn.connector.UnicornUtils;
 
 public class JobDescriptorCommand extends BasicRPCCommand {
 
@@ -34,7 +33,7 @@ public class JobDescriptorCommand extends BasicRPCCommand {
 	public JobDescriptorCommand(String queueName, String workflowName, String[] serviceParams) throws ConnectionException {
 		super(REQUEST_TYPE, queueName);
 		this.workflowName = workflowName;
-		this.serviceParams = serviceParams;
+		this.serviceParams = serviceParams.clone();
 	}
 
 	@Override
@@ -46,21 +45,7 @@ public class JobDescriptorCommand extends BasicRPCCommand {
 	
 	private void addServiceParams(JobDescriptor.Builder jobDescriptorBuilder){
 		for(String param : serviceParams){
-			jobDescriptorBuilder.addConfig(prepareServiceConfig(param));
+			jobDescriptorBuilder.addConfig(UnicornUtils.prepareServiceConfig(param));
 		}
-	}
-	
-	private ServiceConfig.Builder prepareServiceConfig(String param){
-		int commaSign = param.indexOf('.');
-		int equalSign = param.indexOf('=');
-		String serviceName = param.substring(0,commaSign);
-		String paramName = param.substring(commaSign + 1, equalSign);
-		String paramValue = param.substring(equalSign + 1);
-		ServiceConfig.Builder configBuilder = ServiceConfig.newBuilder()
-				.setServiceLabel(serviceName)
-				.addParameters(Parameter.newBuilder()
-						.setName(paramName)
-						.setValue(paramValue));
-		return configBuilder;
 	}
 }

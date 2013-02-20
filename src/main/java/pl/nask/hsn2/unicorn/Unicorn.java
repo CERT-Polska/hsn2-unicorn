@@ -24,10 +24,12 @@ import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Connector;
 import pl.nask.hsn2.unicorn.connector.ConnectorImpl;
 
-public class Unicorn {
+public final class Unicorn {
 	private static Connector connector = null;
-
 	private static CommandLineParams cmdParams;
+
+	private Unicorn() {
+	}
 
 	/**
 	 * @param args

@@ -39,8 +39,6 @@ import pl.nask.hsn2.protobuff.Jobs.JobDescriptor;
 import pl.nask.hsn2.protobuff.Jobs.JobRejected;
 import pl.nask.hsn2.protobuff.Object.Attribute;
 import pl.nask.hsn2.protobuff.Object.ObjectData;
-import pl.nask.hsn2.protobuff.Service.Parameter;
-import pl.nask.hsn2.protobuff.Service.ServiceConfig;
 import pl.nask.hsn2.unicorn.FailedCommandException;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.JobErrorException;
@@ -250,7 +248,7 @@ public class JobDescriptorLoopedCommand extends AbstractCommand {
 				}
 			}
 		}
-		return params.toArray(new String[0]);
+		return params.toArray(new String[params.size()]);
 	}
 
 	protected void displayResults(Map<String, String> data, boolean briefInfo) {
@@ -259,12 +257,19 @@ public class JobDescriptorLoopedCommand extends AbstractCommand {
 			StringBuilder displayResults = new StringBuilder("JOB INFO\n");
 			for (Entry<String, String> entry : data.entrySet()) {
 				String name = entry.getKey();
-				if ((!briefInfo)
-						|| (briefInfo && !"_job_id".equals(name) && !"_job_id".equals(name) && !"job_active_step".equals(name)
-								&& !"job_custom_params".equals(name) && !"job_start_time".equals(name) && !"job_status".equals(name)
-								&& !"job_workflow_name".equals(name) && !"job_workflow_revision".equals(name))) {
-					displayResults.append(name).append(" = ").append(entry.getValue()).append("\n");
+				if (briefInfo
+						&& ("_job_id".equals(name)
+								|| "job_active_step".equals(name)
+								|| "job_custom_params".equals(name)
+								|| "job_start_time".equals(name)
+								|| "job_status".equals(name)
+								|| "job_workflow_name".equals(name)
+								|| "job_workflow_revision".equals(name)
+							)
+					) {
+					continue;
 				}
+				displayResults.append(name).append(" = ").append(entry.getValue()).append("\n");
 			}
 			LOGGER.info(displayResults.toString());
 			previousDisplayValues = data;
@@ -280,22 +285,11 @@ public class JobDescriptorLoopedCommand extends AbstractCommand {
 		// Add service parameters.
 		if (serviceParams != null) {
 			for (String param : serviceParams) {
-				jobDescriptorBuilder.addConfig(prepareServiceConfig(param));
+				jobDescriptorBuilder.addConfig(UnicornUtils.prepareServiceConfig(param));
 			}
 		}
 
 		return jobDescriptorBuilder.build().toByteArray();
-	}
-
-	private ServiceConfig.Builder prepareServiceConfig(String param) {
-		int commaSign = param.indexOf('.');
-		int equalSign = param.indexOf('=');
-		String serviceName = param.substring(0, commaSign);
-		String paramName = param.substring(commaSign + 1, equalSign);
-		String paramValue = param.substring(equalSign + 1);
-		ServiceConfig.Builder configBuilder = ServiceConfig.newBuilder().setServiceLabel(serviceName)
-				.addParameters(Parameter.newBuilder().setName(paramName).setValue(paramValue));
-		return configBuilder;
 	}
 
 	/**
@@ -326,7 +320,6 @@ public class JobDescriptorLoopedCommand extends AbstractCommand {
 				}
 			}
 		}
-
 		return result;
 	}
 }

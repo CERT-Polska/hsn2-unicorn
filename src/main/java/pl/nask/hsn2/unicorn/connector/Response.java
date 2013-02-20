@@ -127,8 +127,7 @@ public class Response {
 
     public OSResponse getOSResponse() throws FailedCommandException {
         try {
-            OSResponse osResponse = new OSResponse(this);
-            return osResponse;
+            return new OSResponse(this);
         } catch (InvalidProtocolBufferException e) {
             throw new FailedCommandException("Wrong response received! ObjectResponse expected.", e);
         }

@@ -1,8 +1,10 @@
 package pl.nask.hsn2.unicorn.connector;
 
 import pl.nask.hsn2.protobuff.Object.Attribute;
+import pl.nask.hsn2.protobuff.Service.Parameter;
+import pl.nask.hsn2.protobuff.Service.ServiceConfig;
 
-public class UnicornUtils {
+public final class UnicornUtils {
 	private UnicornUtils() {
 	}
 
@@ -34,5 +36,16 @@ public class UnicornUtils {
 			break;
 		}
 		return s;
+	}
+
+	public static ServiceConfig.Builder prepareServiceConfig(String param) {
+		int commaSign = param.indexOf('.');
+		int equalSign = param.indexOf('=');
+		String serviceName = param.substring(0, commaSign);
+		String paramName = param.substring(commaSign + 1, equalSign);
+		String paramValue = param.substring(equalSign + 1);
+		ServiceConfig.Builder configBuilder = ServiceConfig.newBuilder().setServiceLabel(serviceName)
+				.addParameters(Parameter.newBuilder().setName(paramName).setValue(paramValue));
+		return configBuilder;
 	}
 }
