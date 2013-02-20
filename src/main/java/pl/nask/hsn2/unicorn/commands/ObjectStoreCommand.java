@@ -29,11 +29,12 @@ import pl.nask.hsn2.unicorn.connector.Response;
 
 public abstract class ObjectStoreCommand extends RPCCommand {
 
-	private final static String DIVIDER_REPLACE = "\n==================================\ndata \\{";
-	private final static String DIVIDER_SEARCH = "data \\{";
-	private final static String REQUEST_TYPE = "ObjectRequest";
-	private final static String DIVIDER_NEW_LINE_FINAL = ";NLF:";
-	private final static String DIVIDER_NEW_LINE = ";NL:";
+	private static final String REGEX_HELPER_1 = "\\}";
+	private static final String DIVIDER_REPLACE = "\n==================================\ndata \\{";
+	private static final String DIVIDER_SEARCH = "data \\{";
+	private static final String REQUEST_TYPE = "ObjectRequest";
+	private static final String DIVIDER_NEW_LINE_FINAL = ";NLF:";
+	private static final String DIVIDER_NEW_LINE = ";NL:";
 	protected Long jobId;
 	protected OSResponse osResponse;
 	protected boolean verbose;
@@ -56,18 +57,18 @@ public abstract class ObjectStoreCommand extends RPCCommand {
 
 			// Change simple attribute.
 			result = result.replaceAll(DIVIDER_NEW_LINE + "attrs \\{" + DIVIDER_NEW_LINE + "name: \\\"([a-z0-9_]+?)\\\"" + DIVIDER_NEW_LINE + "type: [A-Z]+?"
-					+ DIVIDER_NEW_LINE + "\\w+: \\\"?(.+?)\\\"?" + DIVIDER_NEW_LINE + "\\}", "$1=$2" + DIVIDER_NEW_LINE_FINAL);
+					+ DIVIDER_NEW_LINE + "\\w+: \\\"?(.+?)\\\"?" + DIVIDER_NEW_LINE + REGEX_HELPER_1, "$1=$2" + DIVIDER_NEW_LINE_FINAL);
 
 			// Change nested attribute.
 			result = result.replaceAll(DIVIDER_NEW_LINE + "attrs \\{" + DIVIDER_NEW_LINE + "name: \\\"([a-z0-9_]+?)\\\"" + DIVIDER_NEW_LINE + "type: [A-Z]+?"
-					+ DIVIDER_NEW_LINE + "\\w+? \\{" + DIVIDER_NEW_LINE + "(.+?)" + DIVIDER_NEW_LINE + "(.+?)" + DIVIDER_NEW_LINE + "\\}" + DIVIDER_NEW_LINE
-					+ "\\}", "$1=$2,$3" + DIVIDER_NEW_LINE_FINAL);
+					+ DIVIDER_NEW_LINE + "\\w+? \\{" + DIVIDER_NEW_LINE + "(.+?)" + DIVIDER_NEW_LINE + "(.+?)" + DIVIDER_NEW_LINE + REGEX_HELPER_1 + DIVIDER_NEW_LINE
+					+ REGEX_HELPER_1, "$1=$2,$3" + DIVIDER_NEW_LINE_FINAL);
 
 			// Change id.
 			result = result.replaceAll(DIVIDER_NEW_LINE + "id: (\\d+?)", "id=$1" + DIVIDER_NEW_LINE_FINAL);
 
 			// Change object header.
-			result = result.replaceAll(DIVIDER_NEW_LINE + "data \\{(.+?)" + DIVIDER_NEW_LINE + "\\}", "---[Object]-----------------------------"
+			result = result.replaceAll(DIVIDER_NEW_LINE + "data \\{(.+?)" + DIVIDER_NEW_LINE + REGEX_HELPER_1, "---[Object]-----------------------------"
 					+ DIVIDER_NEW_LINE_FINAL + "$1" + DIVIDER_NEW_LINE_FINAL);
 
 			// Change objects counter at the end.

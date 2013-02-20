@@ -50,78 +50,95 @@ import pl.nask.hsn2.unicorn.connector.ConnectionException;
 
 public final class CommandFactory {
 
-	public CommandFactory() {
+	private CommandFactory() {
 	}
 
 	public static Command commandInstanceFor(CommandLineParams cmdParams) throws ConnectionException {
 		CommandLine cmd = cmdParams.getCmd();
 		if (cmd.hasOption("jd")) {
+			// Job descriptor (for starting job).
 			String[] options = cmd.getOptionValues("jd");
 			String workflowName = options[0];
 			String[] serviceParams = Arrays.copyOfRange(options, 1, options.length);
 			return new JobDescriptorCommand(cmdParams.getFrameworkQueueName(), workflowName, serviceParams);
 		} else if (cmd.hasOption("jdf")) {
+			// Job descriptor flood.
 			String[] options = cmd.getOptionValues("jdf");
 			String workflowName = options[0];
 			String filePath = options[1];
 			return new JobDescriptorFloodCommand(cmdParams.getFrameworkQueueName(), workflowName, filePath);
 		} else if (cmd.hasOption("jl")) {
+			// Job list.
 			JobListCommand command = new JobListCommand(cmdParams.getFrameworkQueueName());
 			command.setBrief(cmdParams.isBrief());
 			return command;
 		} else if (cmd.hasOption("ji")) {
-			return new JobInfoCommand(cmdParams.getFrameworkQueueName(), new Long(cmd.getOptionValue("ji")));
+			// Job info.
+			return new JobInfoCommand(cmdParams.getFrameworkQueueName(), Long.valueOf(cmd.getOptionValue("ji")));
 		} else if (cmd.hasOption("status")) {
-			StatusCommand command = new StatusCommand(cmdParams.getFrameworkQueueName(), new Long(cmd.getOptionValue("status")));
+			// Checking status of job.
+			StatusCommand command = new StatusCommand(cmdParams.getFrameworkQueueName(), Long.valueOf(cmd.getOptionValue("status")));
 			command.setVerbose(cmdParams.isVerbose());
 			return command;
 		} else if (cmd.hasOption("lw")) {
+			// List workflows.
 			return new ListWorkflowCommand(cmdParams.getFrameworkQueueName());
 		} else if (cmd.hasOption("gw")) {
+			// Gts workflow.
 			String[] options = cmd.getOptionValues("gw");
 			String workflowName = options[0];
 			String revision = options.length > 1 ? options[1] : "";
 			return new GetWorkflowCommand(cmdParams.getFrameworkQueueName(), workflowName, revision);
 		} else if (cmd.hasOption("gcr")) {
+			// Get config.
 			return new GetConfigCommand(cmdParams.getFrameworkQueueName());
 		} else if (cmd.hasOption("gm")) {
+			// Get message.
 			return new GetMessageCommand(cmd.getOptionValue("gm"));
 		} else if (cmd.hasOption("gms")) {
+			// Get messages.
 			String[] options = cmd.getOptionValues("gms");
 			String queueName = options[0];
 			int numberOfMessages = Integer.parseInt(options[1]);
 			return new GetMessagesCommand(queueName, numberOfMessages);
 		} else if (cmd.hasOption("sm")) {
+			// Get and print messages from queue.
 			return new StreamMessagesCommand(cmd.getOptionValue("sm"));
 		} else if (cmd.hasOption("osg")) {
+			// Return object having the same jobId and objectId.
 			String[] options = cmd.getOptionValues("osg");
-			Long job = new Long(options[0]);
-			Long id = new Long(options[1]);
+			Long job = Long.valueOf(options[0]);
+			Long id = Long.valueOf(options[1]);
 			return new GetObjectCommand(cmdParams.getOsQueueName(), job, id);
 		} else if (cmd.hasOption("dump")) {
-			Long jobId = new Long(cmd.getOptionValue("dump"));
+			// Make dump.
+			Long jobId = Long.valueOf(cmd.getOptionValue("dump"));
 			return new DumpCommand(cmdParams.getOsQueueName(), jobId);
 		} else if (cmd.hasOption("import")) {
+			// Import objects from file to object store.
 			String[] options = cmd.getOptionValues("import");
 			String pathName = options[0];
-			Long jobId = new Long(options[1]);
+			Long jobId = Long.valueOf(options[1]);
 			return new ImportCommand(cmdParams.getOsQueueName(), jobId, pathName);
 		} else if (cmd.hasOption("osqa")) {
-			Long jobId = new Long(cmd.getOptionValue("osqa"));
+			// Ask OS for all objects with specific job id.
+			Long jobId = Long.valueOf(cmd.getOptionValue("osqa"));
 			ObjectStoreCommand command = new QueryAllCommand(cmdParams.getOsQueueName(), jobId);
 			command.setVerbose(cmdParams.isVerbose());
 			command.setBrief(cmdParams.isBrief());
 			return command;
 		} else if (cmd.hasOption("osqn")) {
+			// Ask OS for all objects with specific job id and attribute name.
 			String[] options = cmd.getOptionValues("osqn");
-			Long jobId = new Long(options[0]);
+			Long jobId = Long.valueOf(options[0]);
 			String attributeName = options[1];
 			ObjectStoreCommand command = new QueryNameCommand(cmdParams.getOsQueueName(), jobId, attributeName);
 			command.setVerbose(cmdParams.isVerbose());
 			return command;
 		} else if (cmd.hasOption("osqv")) {
+			// Ask OS for all objects with specific job id, attribute name and value.
 			String[] options = cmd.getOptionValues("osqv");
-			Long jobId = new Long(options[0]);
+			Long jobId = Long.valueOf(options[0]);
 			String attributeName = options[1];
 			String type = options[2];
 			String value = options[3];
@@ -131,13 +148,13 @@ public final class CommandFactory {
 				attribute.setDataString(value);
 				attribute.setType(Type.STRING);
 			} else if (type.equals("i")) {
-				attribute.setDataInt(new Integer(value));
+				attribute.setDataInt(Integer.valueOf(value));
 				attribute.setType(Type.INT);
 			} else if (type.equals("b")) {
-				attribute.setDataBool(new Boolean(value));
+				attribute.setDataBool(Boolean.valueOf(value));
 				attribute.setType(Type.BOOL);
 			} else if (type.equals("o")) {
-				attribute.setDataObject(new Long(value));
+				attribute.setDataObject(Long.valueOf(value));
 				attribute.setType(Type.OBJECT);
 			} else {
 				throw new IllegalStateException("Unknown value type: " + type);
@@ -146,14 +163,15 @@ public final class CommandFactory {
 			command.setVerbose(cmdParams.isVerbose());
 			return command;
 		} else if (cmd.hasOption("osjc")) {
-			return new CleanJobDataCommand(cmdParams.getOsQueueName(), new Long(cmd.getOptionValue("osjc")));
+			// Send job finished message to OS.
+			return new CleanJobDataCommand(cmdParams.getOsQueueName(), Long.valueOf(cmd.getOptionValue("osjc")));
 		} else if (cmd.hasOption("jdl")) {
-			// Get additional arguments.
-			String[] options = cmd.getOptionValues("jdl");
+			// Repeat job given number of times.
 
 			// Check for arguments number.
+			String[] options = cmd.getOptionValues("jdl");
 			if (options.length != 3 && options.length != 4) {
-				throw new IllegalStateException("Wrong number of arguments for -jdl option. " + options.toString());
+				throw new IllegalStateException("Wrong number of arguments for -jdl option. " + Arrays.toString(options));
 			}
 
 			// Parse arguments.

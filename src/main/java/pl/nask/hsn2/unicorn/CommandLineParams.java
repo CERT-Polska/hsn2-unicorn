@@ -28,6 +28,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 public class CommandLineParams {
+	private static final String JOB_ID = "jobId";
 	private Options options = new Options();
 	private CommandLine cmd;
 	private String address = "127.0.0.1";
@@ -64,7 +65,7 @@ public class CommandLineParams {
 		OptionBuilder.withDescription("Job list");
 		optionGroup.addOption(OptionBuilder.create("jl"));
 
-		OptionBuilder.withArgName("jobId");
+		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.withLongOpt("jobInfo");
 		OptionBuilder.hasArg();
 		OptionBuilder.withDescription("Job info");
@@ -111,12 +112,12 @@ public class CommandLineParams {
 		OptionBuilder.withDescription("return object having the same jobId and objectId");
 		optionGroup.addOption(OptionBuilder.create("osg"));
 
-		OptionBuilder.withArgName("jobId");
+		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.hasArg();
 		OptionBuilder.withDescription("Make dump");
 		optionGroup.addOption(OptionBuilder.create("dump"));
 
-		OptionBuilder.withArgName("jobId");
+		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.withLongOpt("objectStoreQueryAll");
 		OptionBuilder.hasArg();
 		OptionBuilder.withDescription("Query for objectStore return ALL objects with jobId");
@@ -136,7 +137,7 @@ public class CommandLineParams {
 		OptionBuilder.withDescription("Query for objectStore return objects having the same jobId attribute named and value as given.");
 		optionGroup.addOption(OptionBuilder.create("osqv"));
 
-		OptionBuilder.withArgName("jobId");
+		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.withLongOpt("objectStoreJobClean");
 		OptionBuilder.hasArg();
 		OptionBuilder
@@ -153,7 +154,7 @@ public class CommandLineParams {
 		OptionBuilder.withDescription("Import objects from file to os");
 		optionGroup.addOption(OptionBuilder.create("import"));
 
-		OptionBuilder.withArgName("jobId");
+		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.hasArg();
 		OptionBuilder.withDescription("checking status of job");
 		optionGroup.addOption(OptionBuilder.create("status"));
