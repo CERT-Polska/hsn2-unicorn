@@ -98,7 +98,7 @@ public class Response {
                     msg += TaskCompleted.parseFrom(body).toString();
                 } else if ("ObjectResponse".equals(type)) {
                     ObjectResponse or = ObjectResponse.parseFrom(body);
-                    StringBuilder builder = new StringBuilder(msg + or.toString());
+                    StringBuilder builder = new StringBuilder(msg).append(or.toString());
                     builder.append("\ncount: ");
                     if (ResponseType.SUCCESS_GET.equals(or.getType())) {
                         builder.append(or.getDataCount());
