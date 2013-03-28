@@ -69,37 +69,36 @@ public class Response {
 
     @Override
     public String toString() {
-        String msg;
+        String msg = "type: " + type + "\n";
         if (DEFAULT_CONTENT_TYPE.equals(contentType)) {
             try {
                 if ("JobAccepted".equals(type)) {
-                    msg = JobAccepted.parseFrom(body).toString();
+                    msg += JobAccepted.parseFrom(body).toString();
                 } else if ("JobListReply".equals(type)) {
-                    msg = JobListReply.parseFrom(body).toString();
+                    msg += JobListReply.parseFrom(body).toString();
                 } else if ("InfoData".equals(type)) {
-                    msg = InfoData.parseFrom(body).toString();
+                    msg += InfoData.parseFrom(body).toString();
                 } else if ("InfoError".equals(type)) {
-                    msg = InfoError.parseFrom(body).toString();
+                    msg += InfoError.parseFrom(body).toString();
                 } else if ("JobRejected".equals(type)) {
-                    msg = JobRejected.parseFrom(body).toString();
+                    msg += JobRejected.parseFrom(body).toString();
                 } else if ("WorkflowListReply".equals(type)) {
-                    msg = WorkflowListReply.parseFrom(body).toString();
+                    msg += WorkflowListReply.parseFrom(body).toString();
                 } else if ("WorkflowGetReply".equals(type)) {
-                    msg = WorkflowGetReply.parseFrom(body).toString();
+                    msg += WorkflowGetReply.parseFrom(body).toString();
                 } else if ("GetConfigReply".equals(type)) {
-                    msg = GetConfigReply.parseFrom(body).toString();
+                    msg += GetConfigReply.parseFrom(body).toString();
                 } else if ("TaskRequest".equals(type)) {
-                    msg = TaskRequest.parseFrom(body).toString();
+                    msg += TaskRequest.parseFrom(body).toString();
                 } else if ("TaskError".equals(type)) {
-                    msg = TaskError.parseFrom(body).toString();
+                    msg += TaskError.parseFrom(body).toString();
                 } else if ("TaskAccepted".equals(type)) {
-                    msg = TaskAccepted.parseFrom(body).toString();
+                    msg += TaskAccepted.parseFrom(body).toString();
                 } else if ("TaskCompleted".equals(type)) {
-                    msg = TaskCompleted.parseFrom(body).toString();
+                    msg += TaskCompleted.parseFrom(body).toString();
                 } else if ("ObjectResponse".equals(type)) {
                     ObjectResponse or = ObjectResponse.parseFrom(body);
-
-                    StringBuilder builder = new StringBuilder(or.toString());
+                    StringBuilder builder = new StringBuilder(msg).append(or.toString());
                     builder.append("\ncount: ");
                     if (ResponseType.SUCCESS_GET.equals(or.getType())) {
                         builder.append(or.getDataCount());
@@ -108,14 +107,14 @@ public class Response {
                     }
                     return builder.toString();
                 } else if ("JobDescriptor".equals(type)) {
-                    msg = JobDescriptor.parseFrom(body).toString();
+                    msg += JobDescriptor.parseFrom(body).toString();
                 } else if ("WorkflowError".equals(type)) {
-                    msg = WorkflowError.parseFrom(body).toString();
+                    msg += WorkflowError.parseFrom(body).toString();
                 } else {
                     throw new IllegalStateException("Unrecognized message type!: " + type + "\n" + new String(body));
                 }
             } catch (InvalidProtocolBufferException e) {
-                msg = "Respones parsing error.";
+                msg += "Respones parsing error.";
                 LOGGER.error(msg, e);
             }
         } else {

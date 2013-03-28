@@ -99,10 +99,10 @@ public class CommandLineParams {
 		OptionBuilder.withDescription("Print messages from queue without consuming");
 		optionGroup.addOption(OptionBuilder.create("gms"));
 
-		OptionBuilder.withArgName("queueName messagesNumber");
+		OptionBuilder.withArgName("queueName");
 		OptionBuilder.withLongOpt("streamMessage");
-		OptionBuilder.hasArg();
-		OptionBuilder.withDescription("get and print messages from queue");
+		OptionBuilder.hasArgs(1);
+		OptionBuilder.withDescription("Get and print all messages from queue. Listens in infinite loop.");
 		optionGroup.addOption(OptionBuilder.create("sm"));
 
 		OptionBuilder.withArgName("jobId objectId");
