@@ -23,13 +23,14 @@ import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Response;
 
 public class StreamMessagesCommand extends ListenCommand {
-
-	public StreamMessagesCommand(String queueName) {
+	public StreamMessagesCommand(String queueName) throws ConnectionException {
 		super(queueName);
+		connector.connectAutoAckListener(queueName);
 	}
 
 	public void execute() throws ConnectionException {
-		while(true){
+		LOGGER.info("Waiting for messages...");
+		while (true) {
 			Response response = connector.receive();
 			LOGGER.info(response.toString());
 		}
