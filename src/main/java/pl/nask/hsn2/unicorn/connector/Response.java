@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import pl.nask.hsn2.protobuff.Config.GetConfigReply;
 import pl.nask.hsn2.protobuff.Info.InfoData;
 import pl.nask.hsn2.protobuff.Info.InfoError;
+import pl.nask.hsn2.protobuff.Info.InfoRequest;
 import pl.nask.hsn2.protobuff.Jobs.JobAccepted;
 import pl.nask.hsn2.protobuff.Jobs.JobDescriptor;
 import pl.nask.hsn2.protobuff.Jobs.JobListReply;
@@ -80,6 +81,8 @@ public class Response {
                     msg += InfoData.parseFrom(body).toString();
                 } else if ("InfoError".equals(type)) {
                     msg += InfoError.parseFrom(body).toString();
+                } else if ("InfoRequest".equals(type)) {
+                	msg += InfoRequest.parseFrom(body).toString();
                 } else if ("JobRejected".equals(type)) {
                     msg += JobRejected.parseFrom(body).toString();
                 } else if ("WorkflowListReply".equals(type)) {
