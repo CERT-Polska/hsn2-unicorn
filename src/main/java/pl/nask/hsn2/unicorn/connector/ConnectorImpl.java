@@ -45,9 +45,10 @@ public class ConnectorImpl implements Connector {
 
 	private ConnectorImpl(){}
 
-	public static Connector getInstance(){
-		if (connector == null)
+	public static Connector getInstance() {
+		if (connector == null) {
 			connector = new ConnectorImpl();
+		}
 		return connector;
 	}
 
