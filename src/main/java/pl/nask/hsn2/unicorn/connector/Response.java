@@ -64,12 +64,11 @@ import pl.nask.hsn2.unicorn.FailedCommandException;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Response {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Response.class);
     private static final String DEFAULT_CONTENT_TYPE = "application/hsn2+protobuf";
-    protected String type;
-    protected String contentType;
-    protected byte[] body;
+    private String type;
+    private String contentType;
+    private byte[] body;
 
     public Response(String type, String contentType, byte[] body) {
         this.type = type;
@@ -86,7 +85,7 @@ public class Response {
     }
 
     public byte[] getBody() {
-        return body;
+        return body.clone();
     }
 
     @Override
@@ -94,8 +93,9 @@ public class Response {
         String msg = "type: " + type + "\n";
 		if (DEFAULT_CONTENT_TYPE.equals(contentType)) {
 			try {
-				if ("GetConfigRequest".equals(type)) {
+				if ("GetConfigRequest".equals(type) || "Ping".equals(type) || "ObjectProcessed".equals(type)) {
 					// Empty message.
+					msg += "(empty body)";
 				} else if ("GetConfigReply".equals(type)) {
 					msg += GetConfigReply.parseFrom(body).toString();
 				} else if ("SetConfigRequest".equals(type)) {
@@ -108,8 +108,6 @@ public class Response {
 					msg += InfoData.parseFrom(body).toString();
 				} else if ("InfoError".equals(type)) {
 					msg += InfoError.parseFrom(body).toString();
-				} else if ("Ping".equals(type)) {
-					// Empty message.
 				} else if ("JobListRequest".equals(type)) {
 					msg += JobListRequest.parseFrom(body).toString();
 				} else if ("JobInfo".equals(type)) {
@@ -146,8 +144,6 @@ public class Response {
 					return builder.toString();
 				} else if ("ObjectAdded".equals(type)) {
 					msg += ObjectAdded.parseFrom(body).toString();
-				} else if ("ObjectProcessed".equals(type)) {
-					// Empty message.
 				} else if ("TaskRequest".equals(type)) {
 					msg += TaskRequest.parseFrom(body).toString();
 				} else if ("TaskAccepted".equals(type)) {
