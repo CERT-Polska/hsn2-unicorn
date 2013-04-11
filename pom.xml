@@ -1,45 +1,62 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>pl.nask.hsn2</groupId>
-  <artifactId>hsn2-unicorn</artifactId>
-  <name>universal client of rabbit network</name>
-  <version>2.0.0-SNAPSHOT</version>
-  <dependencies>
-  	<dependency>
-  		<groupId>org.slf4j</groupId>
-  		<artifactId>slf4j-log4j12</artifactId>
-  		<version>1.6.1</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>com.rabbitmq</groupId>
-  		<artifactId>amqp-client</artifactId>
-  		<version>2.7.1</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>pl.nask.hsn2</groupId>
-  		<artifactId>hsn2-protobuff</artifactId>
-  		<version>2.0.26-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>commons-cli</groupId>
-  		<artifactId>commons-cli</artifactId>
-  		<version>1.2</version>
-  	</dependency>
-  	<dependency>
-    	<groupId>com.googlecode.protobuf-java-format</groupId>
-    	<artifactId>protobuf-java-format</artifactId>
-    	<version>1.2</version>
-	</dependency>
-	<dependency>
-		<groupId>com.googlecode.json-simple</groupId>
-		<artifactId>json-simple</artifactId>
-		<version>1.1.1</version>
-	</dependency>
-  </dependencies>
-  <build>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>pl.nask.hsn2</groupId>
+	<artifactId>hsn2-unicorn</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<name>universal client of rabbit network</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<compiler.plugin.version>3.0</compiler.plugin.version>
+		<jar.plugin.version>2.4</jar.plugin.version>
+		<assembly.plugin.version>2.4</assembly.plugin.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>pl.nask.hsn2</groupId>
+			<artifactId>hsn2-protobuff</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.rabbitmq</groupId>
+			<artifactId>amqp-client</artifactId>
+			<version>2.7.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-cli</groupId>
+					<artifactId>commons-cli</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>commons-cli</groupId>
+			<artifactId>commons-cli</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.protobuf-java-format</groupId>
+			<artifactId>protobuf-java-format</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+	</dependencies>
+
+	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${compiler.plugin.version}</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
@@ -47,70 +64,87 @@
 				</configuration>
 			</plugin>
 		</plugins>
-
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
-					</configuration>
-				</plugin>
-				<plugin>
-					<artifactId>maven-assembly-plugin</artifactId>
-		            <configuration>
-		                <archive>
-		                    <manifest>
-		                        <mainClass>pl.nask.hsn2.unicorn.Unicorn</mainClass>
-		                    </manifest>
-		                </archive>
-		                <descriptorRefs>
-		                    <descriptorRef>jar-with-dependencies</descriptorRef>
-		                </descriptorRefs>
-		            </configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
+
 	<profiles>
 		<profile>
-	      <id>bundle</id>
-	      <build>
-			<plugins>
-			  <plugin>
-			    <artifactId>maven-jar-plugin</artifactId>
-			    <configuration>
-	          	  <archive>
-					<manifest>
-	                  <addClasspath>true</addClasspath>
-	                  <mainClass>pl.nask.hsn2.unicorn.Unicorn</mainClass>                      
-	                  <classpathPrefix>lib/</classpathPrefix>
-	                </manifest>
-	              </archive>
-	            </configuration>		    
-			  </plugin>		  		
-			  		
-			  <plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-	            <executions>
-	              <execution>
-	                <id>hsn2</id>
-	                <phase>package</phase>
-	                <goals>
-	                  <goal>single</goal>
-	                </goals>
-	                <configuration>
-	                  <appendAssemblyId>false</appendAssemblyId>     
-	                  <descriptors>
-	                    <descriptor>src/main/assembly/hsn2.xml</descriptor>
-	                  </descriptors>             
-	                  </configuration>
-	                </execution>
-	            </executions>
-	           </plugin>
-			</plugins>
-		  </build>
-	    </profile>
+			<id>bundle</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-jar-plugin</artifactId>
+						<version>${jar.plugin.version}</version>
+						<configuration>
+							<archive>
+								<manifest>
+									<addClasspath>true</addClasspath>
+									<mainClass>pl.nask.hsn2.unicorn.Unicorn</mainClass>
+									<classpathPrefix>lib/</classpathPrefix>
+								</manifest>
+							</archive>
+						</configuration>
+					</plugin>
+
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>${assembly.plugin.version}</version>
+						<executions>
+							<execution>
+								<id>hsn2</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<appendAssemblyId>false</appendAssemblyId>
+									<descriptors>
+										<descriptor>src/main/assembly/hsn2.xml</descriptor>
+									</descriptors>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>onejar</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>${assembly.plugin.version}</version>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+						</configuration>
+						<executions>
+							<execution>
+								<id>make-assembly</id> <!-- this is used for inheritance merges -->
+								<phase>package</phase> <!-- bind to the packaging phase -->
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<attach>false</attach>
+									<archive>
+										<manifest>
+											<addClasspath>false</addClasspath>
+											<mainClass>pl.nask.hsn2.unicorn.Unicorn</mainClass>
+										</manifest>
+										<manifestEntries>
+											<Class-Path>.</Class-Path>
+										</manifestEntries>
+									</archive>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
 	</profiles>
 </project>
