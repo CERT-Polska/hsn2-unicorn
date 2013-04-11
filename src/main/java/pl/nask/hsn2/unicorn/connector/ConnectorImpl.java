@@ -32,19 +32,27 @@ import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
 
-public class ConnectorImpl implements Connector {
+public final class ConnectorImpl implements Connector {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConnectorImpl.class);
 	private static volatile ConnectorImpl connector;
-
 	private String replyQueueName;
 	private String address;
-
 	private Connection connection;
 	private Channel channel;
 	private QueueingConsumer consumer;
 
-	private ConnectorImpl(){}
+	/**
+	 * This is singleton. No public constructor available.
+	 */
+	private ConnectorImpl() {
+		// Nothing to do.
+	}
 
+	/**
+	 * Instance getter.
+	 * 
+	 * @return Connector instance.
+	 */
 	public static Connector getInstance() {
 		if (connector == null) {
 			connector = new ConnectorImpl();
@@ -57,7 +65,7 @@ public class ConnectorImpl implements Connector {
 	}
 
 	public void connectRPC() throws ConnectionException {
-		if (connection == null || !connection.isOpen()){
+		if (connection == null || !connection.isOpen()) {
 			createConnection();
 			try {
 				replyQueueName = channel.queueDeclare().getQueue();
@@ -69,27 +77,27 @@ public class ConnectorImpl implements Connector {
 		}
 	}
 
-	public void connectAutoAckListener(String replyQueueName) throws ConnectionException{
+	public void connectAutoAckListener(String replyQueueName) throws ConnectionException {
 		connectListener(replyQueueName, true);
 	}
 
-	public void connectManualAckListener(String replyQueueName) throws ConnectionException{
+	public void connectManualAckListener(String replyQueueName) throws ConnectionException {
 		connectListener(replyQueueName, false);
 	}
 
 	private void connectListener(String replyQueueName, boolean autoAck) throws ConnectionException {
-		if (connection == null || !connection.isOpen()){
+		if (connection == null || !connection.isOpen()) {
 			createConnection();
-	        this.replyQueueName = replyQueueName;
-	        prepereConsumerQueue(autoAck);
+			this.replyQueueName = replyQueueName;
+			prepereConsumerQueue(autoAck);
 		}
 	}
 
-	private void createConnection() throws ConnectionException{
+	private void createConnection() throws ConnectionException {
 		ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(address);
+		factory.setHost(address);
 
-        try {
+		try {
 			connection = factory.newConnection();
 			channel = connection.createChannel();
 		} catch (IOException e) {
@@ -115,11 +123,11 @@ public class ConnectorImpl implements Connector {
 		}
 	}
 
-	public Response receive() throws ConnectionException{
+	public Response receive() throws ConnectionException {
 		try {
 			Delivery delivery = consumer.nextDelivery();
-	        BasicProperties properties = delivery.getProperties();
-	        return new Response(properties.getType(), properties.getContentType(), delivery.getBody());
+			BasicProperties properties = delivery.getProperties();
+			return new Response(properties.getType(), properties.getContentType(), delivery.getBody());
 		} catch (ShutdownSignalException e) {
 			throw new ConnectionException("Receiving error!", e);
 		} catch (InterruptedException e) {
@@ -128,11 +136,11 @@ public class ConnectorImpl implements Connector {
 	}
 
 	public void close() {
-		if (connection != null){
-	    	try {
+		if (connection != null) {
+			try {
 				connection.close();
 			} catch (IOException e) {
-				LOGGER.error("Can't close connection.",e);
+				LOGGER.error("Can't close connection.", e);
 			}
 		}
 	}
