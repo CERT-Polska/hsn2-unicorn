@@ -35,7 +35,7 @@ public class OSResponse extends Response {
 	}
 
 	public OSResponse(Response response) throws InvalidProtocolBufferException {
-		super(response.getType(), response.getContentType(), response.getBody());
+		super(response.type, response.contentType, response.body);
 		objectResponse = ObjectResponse.parseFrom(getBody());
 	}
 

@@ -66,9 +66,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 public class Response {
     private static final Logger LOGGER = LoggerFactory.getLogger(Response.class);
     private static final String DEFAULT_CONTENT_TYPE = "application/hsn2+protobuf";
-    private String type;
-    private String contentType;
-    private byte[] body;
+    protected String type;
+    protected String contentType;
+    protected byte[] body;
 
     public Response(String type, String contentType, byte[] body) {
         this.type = type;
