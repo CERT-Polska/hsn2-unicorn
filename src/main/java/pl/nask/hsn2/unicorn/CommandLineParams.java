@@ -47,6 +47,12 @@ public class CommandLineParams {
 		OptionGroup optionGroup = new OptionGroup();
 		optionGroup.setRequired(true);
 
+		OptionBuilder.withArgName(JOB_ID);
+		OptionBuilder.withLongOpt("jobCancel");
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription("Job cancel");
+		optionGroup.addOption(OptionBuilder.create("jc"));
+		
 		OptionBuilder.withArgName("workflowName [serviceParams]");
 		OptionBuilder.withLongOpt("jobDescriptor");
 		OptionBuilder.hasArgs();

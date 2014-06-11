@@ -34,6 +34,7 @@ import pl.nask.hsn2.unicorn.commands.GetMessagesCommand;
 import pl.nask.hsn2.unicorn.commands.GetObjectCommand;
 import pl.nask.hsn2.unicorn.commands.GetWorkflowCommand;
 import pl.nask.hsn2.unicorn.commands.ImportCommand;
+import pl.nask.hsn2.unicorn.commands.JobCancelCommand;
 import pl.nask.hsn2.unicorn.commands.JobDescriptorCommand;
 import pl.nask.hsn2.unicorn.commands.JobDescriptorFloodCommand;
 import pl.nask.hsn2.unicorn.commands.JobDescriptorLoopedCommand;
@@ -55,7 +56,10 @@ public final class CommandFactory {
 
 	public static Command commandInstanceFor(CommandLineParams cmdParams) throws ConnectionException {
 		CommandLine cmd = cmdParams.getCmd();
-		if (cmd.hasOption("jd")) {
+		if (cmd.hasOption("jc")) {
+			// Job cancel.
+			return new JobCancelCommand(cmdParams.getFrameworkQueueName(), Long.valueOf(cmd.getOptionValue("jc")));
+		} else if (cmd.hasOption("jd")) {
 			// Job descriptor (for starting job).
 			String[] options = cmd.getOptionValues("jd");
 			String workflowName = options[0];
