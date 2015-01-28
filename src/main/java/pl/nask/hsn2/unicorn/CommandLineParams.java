@@ -87,6 +87,12 @@ public class CommandLineParams {
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("get Workflow");
 		optionGroup.addOption(OptionBuilder.create("gw"));
+		
+		OptionBuilder.withArgName("workflowFilePath");
+		OptionBuilder.withLongOpt("uploadWorkflow");
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription("Uploads worklfow definition file");
+		optionGroup.addOption(OptionBuilder.create("uw"));
 
 		OptionBuilder.withLongOpt("getConfig");
 		OptionBuilder.withDescription("get config");

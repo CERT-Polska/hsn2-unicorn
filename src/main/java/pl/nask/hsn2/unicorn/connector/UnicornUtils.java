@@ -7,6 +7,10 @@ import pl.nask.hsn2.protobuff.Service.ServiceConfig;
 public final class UnicornUtils {
 	private UnicornUtils() {
 	}
+	
+	public static String getBriefRepresentation(final Attribute a) {
+		return a.getType().name() + " : " + a.getName() + " = " + getValueStringRepresentation(a);
+	}
 
 	public static String getValueStringRepresentation(final Attribute a) {
 		String s = "";

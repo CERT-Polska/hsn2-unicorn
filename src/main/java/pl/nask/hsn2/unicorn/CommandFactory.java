@@ -47,6 +47,7 @@ import pl.nask.hsn2.unicorn.commands.QueryNameCommand;
 import pl.nask.hsn2.unicorn.commands.QueryValueCommand;
 import pl.nask.hsn2.unicorn.commands.StatusCommand;
 import pl.nask.hsn2.unicorn.commands.StreamMessagesCommand;
+import pl.nask.hsn2.unicorn.commands.UploadWorkflowCommand;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 
 public final class CommandFactory {
@@ -93,6 +94,9 @@ public final class CommandFactory {
 			String workflowName = options[0];
 			String revision = options.length > 1 ? options[1] : "";
 			return new GetWorkflowCommand(cmdParams.getFrameworkQueueName(), workflowName, revision);
+		} else if (cmd.hasOption("uw")) {
+			String workflowFileName = cmd.getOptionValue("uw");
+			return new UploadWorkflowCommand(cmdParams.getFrameworkQueueName(), workflowFileName);
 		} else if (cmd.hasOption("gcr")) {
 			// Get config.
 			return new GetConfigCommand(cmdParams.getFrameworkQueueName());
