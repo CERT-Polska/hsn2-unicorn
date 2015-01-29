@@ -95,7 +95,11 @@ public final class ConnectorImpl implements Connector {
 
 	private void createConnection() throws ConnectionException {
 		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost(address);
+		String[] addressParts = address.split(":");
+		factory.setHost(addressParts[0]);
+		if (addressParts.length > 1) {
+			factory.setPort(Integer.parseInt(addressParts[1]));
+		}
 
 		try {
 			connection = factory.newConnection();
