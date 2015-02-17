@@ -1,5 +1,8 @@
 package pl.nask.hsn2.unicorn.connector;
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+
 import pl.nask.hsn2.protobuff.Object.Attribute;
 import pl.nask.hsn2.protobuff.Service.Parameter;
 import pl.nask.hsn2.protobuff.Service.ServiceConfig;
@@ -22,7 +25,7 @@ public final class UnicornUtils {
 			s += a.getDataInt();
 			break;
 		case TIME:
-			s += a.getDataTime();
+			s += (a.getDataTime() + " / " + formattedDateTime(a.getDataTime()));
 			break;
 		case FLOAT:
 			s += a.getDataFloat();
@@ -40,6 +43,11 @@ public final class UnicornUtils {
 			break;
 		}
 		return s;
+	}
+
+	public static String formattedDateTime(long timestamp) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");		
+		return dateFormat.format(new Date(timestamp));
 	}
 
 	public static ServiceConfig.Builder prepareServiceConfig(String param) {
