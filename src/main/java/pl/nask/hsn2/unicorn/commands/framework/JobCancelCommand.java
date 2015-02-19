@@ -1,14 +1,20 @@
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.framework;
+
+import org.apache.commons.cli.CommandLine;
 
 import pl.nask.hsn2.protobuff.Jobs.JobCancelReply;
 import pl.nask.hsn2.protobuff.Jobs.JobCancelRequest;
+import pl.nask.hsn2.unicorn.CommandLineParams;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.BasicRPCCommand;
+import pl.nask.hsn2.unicorn.commands.Command;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Response;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class JobCancelCommand extends BasicRPCCommand {
-
+	
 	private final static String REQUEST_TYPE = "JobCancelRequest";
 	private Long jobId;
 	
@@ -43,5 +49,12 @@ public class JobCancelCommand extends BasicRPCCommand {
 			displayResults.append("WRONG MSG TYPE: ").append(type);
 		}
 		super.displayResults(displayResults.toString());
+	}
+	
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,	CommandLine cmd) throws ConnectionException {
+			return new JobCancelCommand(cmdParams.getFrameworkQueueName(), Long.valueOf(cmd.getOptionValue("jc")));			
+		}
 	}
 }

@@ -20,6 +20,7 @@
 package pl.nask.hsn2.unicorn.commands;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.cli.CommandLine;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -39,6 +41,7 @@ import pl.nask.hsn2.protobuff.Jobs.JobDescriptor;
 import pl.nask.hsn2.protobuff.Jobs.JobRejected;
 import pl.nask.hsn2.protobuff.Object.Attribute;
 import pl.nask.hsn2.protobuff.Object.ObjectData;
+import pl.nask.hsn2.unicorn.CommandLineParams;
 import pl.nask.hsn2.unicorn.FailedCommandException;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.JobErrorException;
@@ -321,5 +324,67 @@ public class JobDescriptorLoopedCommand extends AbstractCommand {
 			}
 		}
 		return result;
+	}
+	
+	public static class Builder extends AbstractCommandBuilder {
+
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+				// Repeat job given number of times.
+
+				// Check for arguments number.
+				String[] options = cmd.getOptionValues("jdl");
+				if (options.length != 3 && options.length != 4) {
+					throw new IllegalStateException("Wrong number of arguments for -jdl option. " + Arrays.toString(options));
+				}
+
+				// Parse arguments.
+				String actionType = options[0];
+				long loopCount = 1;
+
+				// Parse 'count' argument.
+				try {
+					loopCount = Long.valueOf(options[2]);
+					if (loopCount < 1) {
+						throw new NumberFormatException();
+					}
+				} catch (NumberFormatException e) {
+					throw new IllegalStateException("Third argument for -jdl option should be positive number. Provided: " + options[2]);
+				}
+
+				// Parse 'interval' argument.
+				Long sleepTime = null;
+				if (options.length == 4) {
+					try {
+						sleepTime = Long.valueOf(options[3]);
+						if (sleepTime < 1) {
+							throw new NumberFormatException();
+						}
+					} catch (NumberFormatException e) {
+						throw new IllegalStateException("Third argument for -jdl option should be positive number. Provided: " + options[2]);
+					}
+				}
+
+				// 'action' argument should be 'id' or 'w' only.
+				if ("id".equals(actionType)) {
+					try {
+						// 1st argument is 'id', 2nd argument has to be positive number.
+						long jobId = Long.parseLong(options[1]);
+						if (jobId < 1) {
+							throw new NumberFormatException();
+						}
+						return new JobDescriptorLoopedCommand(cmdParams.getFrameworkQueueName(), jobId, loopCount, sleepTime);
+					} catch (NumberFormatException e) {
+						throw new IllegalStateException("'param' argument for -jdl option should be positive number. Provided: " + options[1]);
+					}
+				} else if ("w".equals(actionType)) {
+					// 'action' argument is 'w'.
+					return new JobDescriptorLoopedCommand(cmdParams.getFrameworkQueueName(), options[1], loopCount, sleepTime);
+				} else {
+					// Wrong 'action' argument.
+					throw new IllegalStateException("'action' argument for -jdl option should be 'id' or 'w'. Provided: " + actionType);
+				}
+		}
 	}
 }

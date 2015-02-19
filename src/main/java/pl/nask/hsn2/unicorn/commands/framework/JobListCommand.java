@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.framework;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,10 +25,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.cli.CommandLine;
+
 import pl.nask.hsn2.protobuff.Jobs.JobInfo;
 import pl.nask.hsn2.protobuff.Jobs.JobListReply;
 import pl.nask.hsn2.protobuff.Jobs.JobListRequest;
 import pl.nask.hsn2.protobuff.Jobs.JobStatus;
+import pl.nask.hsn2.unicorn.CommandLineParams;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.BasicRPCCommand;
+import pl.nask.hsn2.unicorn.commands.Command;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Response;
 
@@ -112,5 +118,16 @@ public class JobListCommand extends BasicRPCCommand {
 
 	public void setBrief(boolean brief) {
 		this.brief = brief;
+	}
+
+	public static class Builder extends AbstractCommandBuilder {
+
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams, CommandLine cmd)
+				throws ConnectionException {
+			JobListCommand command = new JobListCommand(cmdParams.getFrameworkQueueName());
+			command.setBrief(cmdParams.isBrief());
+			return command;
+		}
 	}
 }

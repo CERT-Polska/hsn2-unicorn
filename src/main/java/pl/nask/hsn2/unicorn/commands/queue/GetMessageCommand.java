@@ -17,22 +17,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.queue;
 
+import org.apache.commons.cli.CommandLine;
+
+import pl.nask.hsn2.unicorn.CommandLineParams;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.Command;
+import pl.nask.hsn2.unicorn.commands.ListenCommand;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Response;
 
-public class StreamMessagesCommand extends ListenCommand {
-	public StreamMessagesCommand(String queueName) throws ConnectionException {
+
+public class GetMessageCommand extends ListenCommand {
+	public GetMessageCommand(String queueName) throws ConnectionException {
 		super(queueName);
-		connector.connectAutoAckListener(queueName);
+		connector.connectManualAckListener(queueName);
 	}
 
-	public void execute() throws ConnectionException {
-		LOGGER.info("Waiting for messages...");
-		while (true) {
-			Response response = connector.receive();
-			LOGGER.info(response.toString());
+	public void execute() throws ConnectionException  {
+		Response response = connector.receive();
+		LOGGER.info(response.toString());
+	}
+	
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+			return new GetMessageCommand(cmd.getOptionValue("gm"));
 		}
 	}
 }

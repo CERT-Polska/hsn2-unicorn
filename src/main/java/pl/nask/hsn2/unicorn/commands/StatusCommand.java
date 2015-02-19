@@ -24,18 +24,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.cli.CommandLine;
+
 import pl.nask.hsn2.protobuff.Info.InfoData;
 import pl.nask.hsn2.protobuff.Info.InfoRequest;
 import pl.nask.hsn2.protobuff.Info.InfoType;
 import pl.nask.hsn2.protobuff.Object.Attribute;
 import pl.nask.hsn2.protobuff.Object.ObjectData;
+import pl.nask.hsn2.unicorn.CommandLineParams;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Response;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-public class StatusCommand extends RPCCommand {
-	
+public class StatusCommand extends RPCCommand {	
 	private final static String REQUEST_TYPE = "InfoRequest";
 	private Long jobId;
 	private boolean verbose;
@@ -132,6 +134,16 @@ public class StatusCommand extends RPCCommand {
 
 	public void setVerbose(boolean verbose) {
 		this.verbose = verbose;		
+	}
+	
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+			StatusCommand command = new StatusCommand(cmdParams.getFrameworkQueueName(), Long.valueOf(cmd.getOptionValue("status")));
+			command.setVerbose(cmdParams.isVerbose());
+			return command;
+		}
 	}
 	
 }

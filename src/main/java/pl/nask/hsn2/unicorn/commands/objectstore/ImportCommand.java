@@ -17,14 +17,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.objectstore;
 
+import org.apache.commons.cli.CommandLine;
+
+import pl.nask.hsn2.unicorn.CommandLineParams;
 import pl.nask.hsn2.unicorn.FailedCommandException;
 import pl.nask.hsn2.unicorn.ObjectsDumper;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.Command;
+import pl.nask.hsn2.unicorn.commands.ObjectStoreCommand;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 
+// Import objects from file to object store.
 public class ImportCommand extends ObjectStoreCommand {
-
 	private String pathName;
 
 	public ImportCommand(String queueName, Long jobId, String pathName) throws ConnectionException {
@@ -43,4 +49,14 @@ public class ImportCommand extends ObjectStoreCommand {
 		LOGGER.info("Import result: " + osResponseToString());
 	}
 
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+			String[] options = cmd.getOptionValues("import");
+			String pathName = options[0];
+			Long jobId = Long.valueOf(options[1]);
+			return new ImportCommand(cmdParams.getOsQueueName(), jobId, pathName);
+		}
+	}
 }

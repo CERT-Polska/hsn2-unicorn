@@ -17,13 +17,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.framework;
+
+import java.util.Arrays;
+
+import org.apache.commons.cli.CommandLine;
 
 import pl.nask.hsn2.protobuff.Jobs.JobDescriptor;
+import pl.nask.hsn2.unicorn.CommandLineParams;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.BasicRPCCommand;
+import pl.nask.hsn2.unicorn.commands.Command;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.UnicornUtils;
 
-public class JobDescriptorCommand extends BasicRPCCommand {
+public class JobDescriptorCommand extends BasicRPCCommand {	
 
 	private final static String REQUEST_TYPE = "JobDescriptor";
 
@@ -46,6 +54,18 @@ public class JobDescriptorCommand extends BasicRPCCommand {
 	private void addServiceParams(JobDescriptor.Builder jobDescriptorBuilder){
 		for(String param : serviceParams){
 			jobDescriptorBuilder.addConfig(UnicornUtils.prepareServiceConfig(param));
+		}
+	}
+	
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+			// Job descriptor (for starting job).
+			String[] options = cmd.getOptionValues("jd");
+			String workflowName = options[0];
+			String[] serviceParams = Arrays.copyOfRange(options, 1, options.length);
+			return new JobDescriptorCommand(cmdParams.getFrameworkQueueName(), workflowName, serviceParams);
 		}
 	}
 }

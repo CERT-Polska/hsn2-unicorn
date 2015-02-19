@@ -17,33 +17,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.objectstore;
 
-import pl.nask.hsn2.protobuff.Object.Attribute;
+import org.apache.commons.cli.CommandLine;
+
 import pl.nask.hsn2.protobuff.ObjectStore.ObjectRequest;
-import pl.nask.hsn2.protobuff.ObjectStore.ObjectRequest.QueryStructure;
-import pl.nask.hsn2.protobuff.ObjectStore.ObjectRequest.QueryStructure.QueryType;
+import pl.nask.hsn2.unicorn.CommandLineParams;
 import pl.nask.hsn2.unicorn.FailedCommandException;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.Command;
+import pl.nask.hsn2.unicorn.commands.ObjectStoreCommand;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 
-public class QueryValueCommand extends ObjectStoreCommand {
-
-	private String attributeName;
-	private Attribute attribute;
-
-	public QueryValueCommand(String queueName, Long jobId, String attributeName, Attribute attribute) throws ConnectionException {
+// Ask OS for all objects with specific job id.
+public class QueryAllCommand extends ObjectStoreCommand {
+	public QueryAllCommand(String queueName, Long jobId) throws ConnectionException {
 		super(queueName, jobId);
-		this.attributeName = attributeName;
-		this.attribute = attribute;
 	}
 
 	@Override
 	protected void buildMessage() {
-		ObjectRequest objectRequest = buildQueryMessage(QueryStructure.newBuilder()
-				.setType(QueryType.BY_ATTR_VALUE)
-				.setAttrName(attributeName)
-				.setAttrValue(attribute)
-				.build());
+		ObjectRequest objectRequest = buildQueryMessage();
 		message = objectRequest.toByteArray();
 	}
 
@@ -53,4 +47,15 @@ public class QueryValueCommand extends ObjectStoreCommand {
 		LOGGER.info(osResponseToString());
 	}
 
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+			Long jobId = Long.valueOf(cmd.getOptionValue("osqa"));
+			ObjectStoreCommand command = new QueryAllCommand(cmdParams.getOsQueueName(), jobId);
+			command.setVerbose(cmdParams.isVerbose());
+			command.setBrief(cmdParams.isBrief());
+			return command;
+		}
+	}
 }

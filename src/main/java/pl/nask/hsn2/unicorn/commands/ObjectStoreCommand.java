@@ -23,6 +23,7 @@ import pl.nask.hsn2.protobuff.ObjectStore.ObjectRequest;
 import pl.nask.hsn2.protobuff.ObjectStore.ObjectRequest.QueryStructure;
 import pl.nask.hsn2.protobuff.ObjectStore.ObjectRequest.RequestType;
 import pl.nask.hsn2.unicorn.FailedCommandException;
+import pl.nask.hsn2.unicorn.commands.objectstore.GetObjectCommand;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.OSResponse;
 import pl.nask.hsn2.unicorn.connector.Response;

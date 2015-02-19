@@ -1,4 +1,4 @@
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.framework;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -6,7 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.apache.commons.cli.CommandLine;
+
 import pl.nask.hsn2.protobuff.Workflows.WorkflowUploadRequest;
+import pl.nask.hsn2.unicorn.CommandLineParams;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.BasicRPCCommand;
+import pl.nask.hsn2.unicorn.commands.Command;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 
 public class UploadWorkflowCommand extends BasicRPCCommand {
@@ -37,6 +43,15 @@ public class UploadWorkflowCommand extends BasicRPCCommand {
 			return builder.toString();
 		} catch (IOException e) {
 			throw new IllegalStateException("Error reading workflow file: " + e.getMessage());
+		}
+	}
+	
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+			String workflowFileName = cmd.getOptionValue("uw");
+			return new UploadWorkflowCommand(cmdParams.getFrameworkQueueName(), workflowFileName);
 		}
 	}
 }

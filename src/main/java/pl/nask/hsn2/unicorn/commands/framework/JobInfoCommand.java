@@ -17,10 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.framework;
 
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.commons.cli.CommandLine;
 
 import pl.nask.hsn2.protobuff.Info.InfoData;
 import pl.nask.hsn2.protobuff.Info.InfoError;
@@ -28,13 +30,17 @@ import pl.nask.hsn2.protobuff.Info.InfoRequest;
 import pl.nask.hsn2.protobuff.Info.InfoType;
 import pl.nask.hsn2.protobuff.Object.Attribute;
 import pl.nask.hsn2.protobuff.Object.ObjectData;
+import pl.nask.hsn2.unicorn.CommandLineParams;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.BasicRPCCommand;
+import pl.nask.hsn2.unicorn.commands.Command;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Response;
 import pl.nask.hsn2.unicorn.connector.UnicornUtils;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-public class JobInfoCommand extends BasicRPCCommand {
+public class JobInfoCommand extends BasicRPCCommand {	
 
 	private final static String REQUEST_TYPE = "InfoRequest";
 	private Long jobId;
@@ -86,5 +92,12 @@ public class JobInfoCommand extends BasicRPCCommand {
 			displayResults.append("WRONG MSG TYPE: ").append(type);
 		}
 		super.displayResults(displayResults.toString());
+	}
+	
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,	CommandLine cmd) throws ConnectionException {
+			return new JobInfoCommand(cmdParams.getFrameworkQueueName(), Long.valueOf(cmd.getOptionValue("ji")));
+		}
 	}
 }
