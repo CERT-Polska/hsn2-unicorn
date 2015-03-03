@@ -70,6 +70,12 @@ public class CommandLineParams {
 		OptionBuilder.withLongOpt("jobList");
 		OptionBuilder.withDescription("Job list");
 		optionGroup.addOption(OptionBuilder.create("jl"));
+		
+		OptionBuilder.withLongOpt("jobListQuery");
+		OptionBuilder.withArgName("workflowName");
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription("List of jobs with the given workflow name");
+		optionGroup.addOption(OptionBuilder.create("jlq"));
 
 		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.withLongOpt("jobInfo");

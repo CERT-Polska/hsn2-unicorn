@@ -21,7 +21,6 @@ package pl.nask.hsn2.unicorn.commands.framework;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -100,20 +99,26 @@ public class JobListCommand extends BasicRPCCommand {
 
 	private String getDisplayMessage(Map<JobStatus, Set<Long>> jobs) {
 		StringBuilder sb = new StringBuilder("\n\n");
-		for (Entry<JobStatus, Set<Long>> entry : jobs.entrySet()) {
-			sb.append("Job status: ").append(entry.getKey()).append("\nJobs counter: ").append(entry.getValue().size()).append("\n");
-			boolean isFirstJob = true;
-			for (long id : jobs.get(entry.getKey())) {
-				if (isFirstJob) {
-					isFirstJob = false;
-				} else {
-					sb.append(", ");
-				}
-				sb.append(id);
-			}
-			sb.append("\n\n");
+		for (JobStatus jobStatus: JobStatus.values()) {
+			appendJobInStatusInfo(sb, jobStatus, jobs.get(jobStatus));
 		}
 		return sb.toString();
+	}
+
+	protected void appendJobInStatusInfo(StringBuilder sb, JobStatus status, Set<Long> jobIds) {
+		if (jobIds == null)
+			return;
+		sb.append("Job status: ").append(status).append("\nJobs counter: ").append(jobIds.size()).append("\n");
+		boolean isFirstJob = true;
+		for (long id : jobIds) {
+			if (isFirstJob) {
+				isFirstJob = false;
+			} else {
+				sb.append(", ");
+			}
+			sb.append(id);
+		}
+		sb.append("\n\n");
 	}
 
 	public void setBrief(boolean brief) {

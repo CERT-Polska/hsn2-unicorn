@@ -2,6 +2,9 @@ package pl.nask.hsn2.unicorn.connector;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import pl.nask.hsn2.protobuff.Object.Attribute;
 import pl.nask.hsn2.protobuff.Service.Parameter;
@@ -59,5 +62,14 @@ public final class UnicornUtils {
 		ServiceConfig.Builder configBuilder = ServiceConfig.newBuilder().setServiceLabel(serviceName)
 				.addParameters(Parameter.newBuilder().setName(paramName).setValue(paramValue));
 		return configBuilder;
+	}
+	
+	public static Map<String, String> getAttributesMap(List<Attribute> attrsList) {
+		Map<String, String> attributes = new HashMap<>();
+		for(Attribute attribute : attrsList){
+			String value = getValueStringRepresentation(attribute);			
+			attributes.put(attribute.getName(), value);
+		}
+		return attributes;
 	}
 }

@@ -26,24 +26,9 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.cli.CommandLine;
 
 import pl.nask.hsn2.unicorn.commands.*;
-import pl.nask.hsn2.unicorn.commands.framework.GetConfigCommand;
-import pl.nask.hsn2.unicorn.commands.framework.GetWorkflowCommand;
-import pl.nask.hsn2.unicorn.commands.framework.JobCancelCommand;
-import pl.nask.hsn2.unicorn.commands.framework.JobDescriptorCommand;
-import pl.nask.hsn2.unicorn.commands.framework.JobInfoCommand;
-import pl.nask.hsn2.unicorn.commands.framework.JobListCommand;
-import pl.nask.hsn2.unicorn.commands.framework.ListWorkflowCommand;
-import pl.nask.hsn2.unicorn.commands.framework.UploadWorkflowCommand;
-import pl.nask.hsn2.unicorn.commands.objectstore.CleanJobDataCommand;
-import pl.nask.hsn2.unicorn.commands.objectstore.DumpCommand;
-import pl.nask.hsn2.unicorn.commands.objectstore.GetObjectCommand;
-import pl.nask.hsn2.unicorn.commands.objectstore.ImportCommand;
-import pl.nask.hsn2.unicorn.commands.objectstore.QueryAllCommand;
-import pl.nask.hsn2.unicorn.commands.objectstore.QueryNameCommand;
-import pl.nask.hsn2.unicorn.commands.objectstore.QueryValueCommand;
-import pl.nask.hsn2.unicorn.commands.queue.GetMessageCommand;
-import pl.nask.hsn2.unicorn.commands.queue.GetMessagesCommand;
-import pl.nask.hsn2.unicorn.commands.queue.StreamMessagesCommand;
+import pl.nask.hsn2.unicorn.commands.framework.*;
+import pl.nask.hsn2.unicorn.commands.objectstore.*;
+import pl.nask.hsn2.unicorn.commands.queue.*;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 
 public final class CommandFactory {
@@ -52,6 +37,7 @@ public final class CommandFactory {
 	static {
 		register("jc", JobCancelCommand.Builder.class);
 		register("jl", JobListCommand.Builder.class);
+		register("jlq", JobListQueryCommand.Builder.class);
 		register("jd", JobDescriptorCommand.Builder.class);
 		register("jdl", JobDescriptorLoopedCommand.Builder.class);
 		register("ji", JobInfoCommand.Builder.class);
