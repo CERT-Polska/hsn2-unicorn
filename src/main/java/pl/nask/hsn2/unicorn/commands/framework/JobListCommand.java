@@ -99,7 +99,8 @@ public class JobListCommand extends BasicRPCCommand {
 
 	private String getDisplayMessage(Map<JobStatus, Set<Long>> jobs) {
 		StringBuilder sb = new StringBuilder("\n\n");
-		for (JobStatus jobStatus: JobStatus.values()) {
+		for (int i = JobStatus.values().length - 1; i >= 0; i--) {
+			JobStatus jobStatus = JobStatus.values()[i];
 			appendJobInStatusInfo(sb, jobStatus, jobs.get(jobStatus));
 		}
 		return sb.toString();
