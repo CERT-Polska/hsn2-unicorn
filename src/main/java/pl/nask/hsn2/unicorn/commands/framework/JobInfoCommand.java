@@ -64,7 +64,7 @@ public class JobInfoCommand extends BasicRPCCommand {
 	@Override
 	protected void displayResults(Response response) {
 		String type = response.getType();
-		StringBuilder displayResults = new StringBuilder("JOB INFO\n");
+		StringBuilder displayResults = new StringBuilder("JOB INFO: " + jobId + "\n");
 		if ("InfoData".equals(type)) {
 			try {
 				Set<String> displayValues = new TreeSet<>();

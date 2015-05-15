@@ -103,7 +103,19 @@ public class JobListCommand extends BasicRPCCommand {
 			JobStatus jobStatus = JobStatus.values()[i];
 			appendJobInStatusInfo(sb, jobStatus, jobs.get(jobStatus));
 		}
+		appendJobSummary(sb, jobs);
 		return sb.toString();
+	}
+
+	private void appendJobSummary(StringBuilder sb,	Map<JobStatus, Set<Long>> jobs) {
+		sb.append("\nSummary: ");
+		for (int i = JobStatus.values().length - 1; i >= 0; i--) {
+			JobStatus jobStatus = JobStatus.values()[i];
+			Set<Long> jobsInStatus = jobs.get(jobStatus);
+			if (jobsInStatus != null && jobsInStatus.size() != 0) {
+				sb.append(jobStatus).append("(").append(jobsInStatus.size()).append(") ");
+			}
+		}
 	}
 
 	protected void appendJobInStatusInfo(StringBuilder sb, JobStatus status, Set<Long> jobIds) {
