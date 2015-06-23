@@ -1,8 +1,11 @@
-Package: hsn2-unicorn
-Version: {VER}
+Source: hsn2-unicorn
 Section: unknown
 Priority: optional
+Maintainer: CERT Polska <info@cert.pl>
+Build-Depends: debhelper (>= 8.0.0), maven
+Standards-Version: 3.9.3
+
+Package: hsn2-unicorn
 Architecture: all
-Maintainer: Pawel Jacewicz <pawel.jacewicz@cert.pl>
+Depends: ${misc:Depends}, openjdk-7-jre
 Description: HSN2 Object Store query tool
-Distribution: {DEBIAN_DIST}

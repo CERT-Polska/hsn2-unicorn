@@ -1,7 +1,0 @@
-#!/bin/sh
-set -e
-if [ "$1" = "configure" ]; then
-  if [ -e /opt/hsn2/unicorn/unicorn ]; then
-    ln -s /opt/hsn2/unicorn/unicorn /usr/bin/unicorn
-  fi
-fi
