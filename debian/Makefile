@@ -1,9 +1,9 @@
 #
 # This Makefile is responsoble for build debian package.
 # 4 variables must be provided:
-#   HSN2_VER=2.X
+#   HSN2_VER=2.0
 #   BUILD_NUMBER=999
-#   DEBIAN_DIST=(experimental|2.X)
+#   DEBIAN_DIST=(experimental|2.0)
 
 DEBIAN_DIST=experimental
 
