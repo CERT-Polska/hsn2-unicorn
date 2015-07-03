@@ -4,7 +4,7 @@
 	<groupId>pl.nask.hsn2</groupId>
 	<artifactId>hsn2-unicorn</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>universal client of rabbit network</name>
+	<name>HSN2 command console</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -159,4 +159,5 @@
 		</profile>
 
 	</profiles>
+	<description>A command line tool for managing the HSN2 job pool and for retrieving job status information.</description>
 </project>

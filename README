@@ -1,7 +1,8 @@
 HSN2 Unicorn (hsn2-unicorn)
 
 
-HSN2 Unicorn is a command line tool for advanced managing and quering jobs.
+A command line tool for managing the HSN2 job pool and for retrieving
+job status information.
 
 
 
