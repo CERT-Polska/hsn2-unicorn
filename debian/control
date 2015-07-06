@@ -11,4 +11,4 @@ Depends: ${misc:Depends}, openjdk-7-jre
 Homepage: http://www.honeyspider.net
 Description: HSN2 command console
  A command line tool for managing the HSN2 job pool and for retrieving
-job status information.
+ job status information.
