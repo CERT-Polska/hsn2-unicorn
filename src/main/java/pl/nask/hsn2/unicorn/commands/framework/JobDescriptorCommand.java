@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.framework;
+
+import java.util.Arrays;
+
+import org.apache.commons.cli.CommandLine;
 
 import pl.nask.hsn2.protobuff.Jobs.JobDescriptor;
-import pl.nask.hsn2.protobuff.Service.Parameter;
-import pl.nask.hsn2.protobuff.Service.ServiceConfig;
+import pl.nask.hsn2.unicorn.CommandLineParams;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.BasicRPCCommand;
+import pl.nask.hsn2.unicorn.commands.Command;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
+import pl.nask.hsn2.unicorn.connector.UnicornUtils;
 
-public class JobDescriptorCommand extends BasicRPCCommand {
+public class JobDescriptorCommand extends BasicRPCCommand {	
 
 	private final static String REQUEST_TYPE = "JobDescriptor";
 
@@ -34,7 +41,7 @@ public class JobDescriptorCommand extends BasicRPCCommand {
 	public JobDescriptorCommand(String queueName, String workflowName, String[] serviceParams) throws ConnectionException {
 		super(REQUEST_TYPE, queueName);
 		this.workflowName = workflowName;
-		this.serviceParams = serviceParams;
+		this.serviceParams = serviceParams.clone();
 	}
 
 	@Override
@@ -46,21 +53,19 @@ public class JobDescriptorCommand extends BasicRPCCommand {
 	
 	private void addServiceParams(JobDescriptor.Builder jobDescriptorBuilder){
 		for(String param : serviceParams){
-			jobDescriptorBuilder.addConfig(prepareServiceConfig(param));
+			jobDescriptorBuilder.addConfig(UnicornUtils.prepareServiceConfig(param));
 		}
 	}
 	
-	private ServiceConfig.Builder prepareServiceConfig(String param){
-		int commaSign = param.indexOf('.');
-		int equalSign = param.indexOf('=');
-		String serviceName = param.substring(0,commaSign);
-		String paramName = param.substring(commaSign + 1, equalSign);
-		String paramValue = param.substring(equalSign + 1);
-		ServiceConfig.Builder configBuilder = ServiceConfig.newBuilder()
-				.setServiceLabel(serviceName)
-				.addParameters(Parameter.newBuilder()
-						.setName(paramName)
-						.setValue(paramValue));
-		return configBuilder;
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+			// Job descriptor (for starting job).
+			String[] options = cmd.getOptionValues("jd");
+			String workflowName = options[0];
+			String[] serviceParams = Arrays.copyOfRange(options, 1, options.length);
+			return new JobDescriptorCommand(cmdParams.getFrameworkQueueName(), workflowName, serviceParams);
+		}
 	}
 }

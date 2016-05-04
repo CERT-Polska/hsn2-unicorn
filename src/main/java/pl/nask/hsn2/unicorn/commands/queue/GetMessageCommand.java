@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,31 +17,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.queue;
 
+import org.apache.commons.cli.CommandLine;
+
+import pl.nask.hsn2.unicorn.CommandLineParams;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.Command;
+import pl.nask.hsn2.unicorn.commands.ListenCommand;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Response;
 
-public class GetMessagesCommand extends ListenCommand {
-	private final static String DIVIDER = "\n=======================================";
-	private final int msgNumber;
 
-	public GetMessagesCommand(String queueName, int messagesNumber) throws ConnectionException {
+public class GetMessageCommand extends ListenCommand {
+	public GetMessageCommand(String queueName) throws ConnectionException {
 		super(queueName);
-		if (messagesNumber < 1) {
-			msgNumber = 1;
-			LOGGER.info("Illegal messages number. Set to 1.");
-		} else {
-			msgNumber = messagesNumber;
-		}
 		connector.connectManualAckListener(queueName);
 	}
 
-	public void execute() throws ConnectionException {
-		for (int i = 0; i < msgNumber; i++) {
-			Response response = connector.receive();
-			LOGGER.info(response.toString() + DIVIDER);
+	public void execute() throws ConnectionException  {
+		Response response = connector.receive();
+		LOGGER.info(response.toString());
+	}
+	
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+			return new GetMessageCommand(cmd.getOptionValue("gm"));
 		}
 	}
-
 }

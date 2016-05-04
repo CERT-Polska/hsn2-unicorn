@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,20 +19,10 @@
 
 package pl.nask.hsn2.unicorn.commands;
 
-import pl.nask.hsn2.protobuff.Config.GetConfigRequest;
-import pl.nask.hsn2.unicorn.connector.ConnectionException;
+import pl.nask.hsn2.unicorn.CommandLineParams;
 
-public class GetConfigCommand extends BasicRPCCommand {
+public interface CommandBuilder {
 
-	private final static String REQUEST_TYPE = "GetConfigRequest";
-
-	public GetConfigCommand(String queueName) throws ConnectionException {
-		super(REQUEST_TYPE, queueName);
-	}
-
-	@Override
-	protected void buildMessage() {
-		message = GetConfigRequest.newBuilder().build().toByteArray();
-	}
+	Command build(CommandLineParams cmdParams);
 
 }

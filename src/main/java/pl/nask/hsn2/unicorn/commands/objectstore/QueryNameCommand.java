@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.objectstore;
+
+import org.apache.commons.cli.CommandLine;
 
 import pl.nask.hsn2.protobuff.ObjectStore.ObjectRequest;
 import pl.nask.hsn2.protobuff.ObjectStore.ObjectRequest.QueryStructure;
 import pl.nask.hsn2.protobuff.ObjectStore.ObjectRequest.QueryStructure.QueryType;
+import pl.nask.hsn2.unicorn.CommandLineParams;
 import pl.nask.hsn2.unicorn.FailedCommandException;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.Command;
+import pl.nask.hsn2.unicorn.commands.ObjectStoreCommand;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 
+// Ask OS for all objects with specific job id and attribute name.
 public class QueryNameCommand extends ObjectStoreCommand {
-
 	private String attributeName;
 
 	public QueryNameCommand(String queueName, Long jobId, String attributrName) throws ConnectionException {
@@ -49,4 +55,17 @@ public class QueryNameCommand extends ObjectStoreCommand {
 		LOGGER.info(osResponseToString());
 	}
 
+
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+			String[] options = cmd.getOptionValues("osqn");
+			Long jobId = Long.valueOf(options[0]);
+			String attributeName = options[1];
+			ObjectStoreCommand command = new QueryNameCommand(cmdParams.getOsQueueName(), jobId, attributeName);
+			command.setVerbose(cmdParams.isVerbose());
+			return command;
+		}
+	}
 }

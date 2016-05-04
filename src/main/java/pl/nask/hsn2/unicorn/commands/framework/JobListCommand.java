@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,18 +17,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.framework;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.commons.cli.CommandLine;
 
 import pl.nask.hsn2.protobuff.Jobs.JobInfo;
 import pl.nask.hsn2.protobuff.Jobs.JobListReply;
 import pl.nask.hsn2.protobuff.Jobs.JobListRequest;
 import pl.nask.hsn2.protobuff.Jobs.JobStatus;
+import pl.nask.hsn2.unicorn.CommandLineParams;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.BasicRPCCommand;
+import pl.nask.hsn2.unicorn.commands.Command;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Response;
 
@@ -94,23 +99,53 @@ public class JobListCommand extends BasicRPCCommand {
 
 	private String getDisplayMessage(Map<JobStatus, Set<Long>> jobs) {
 		StringBuilder sb = new StringBuilder("\n\n");
-		for (Entry<JobStatus, Set<Long>> entry : jobs.entrySet()) {
-			sb.append("Job status: ").append(entry.getKey()).append("\nJobs counter: ").append(entry.getValue().size()).append("\n");
-			boolean isFirstJob = true;
-			for (long id : jobs.get(entry.getKey())) {
-				if (isFirstJob) {
-					isFirstJob = false;
-				} else {
-					sb.append(", ");
-				}
-				sb.append(id);
-			}
-			sb.append("\n\n");
+		for (int i = JobStatus.values().length - 1; i >= 0; i--) {
+			JobStatus jobStatus = JobStatus.values()[i];
+			appendJobInStatusInfo(sb, jobStatus, jobs.get(jobStatus));
 		}
+		appendJobSummary(sb, jobs);
 		return sb.toString();
+	}
+
+	private void appendJobSummary(StringBuilder sb,	Map<JobStatus, Set<Long>> jobs) {
+		sb.append("\nSummary: ");
+		for (int i = JobStatus.values().length - 1; i >= 0; i--) {
+			JobStatus jobStatus = JobStatus.values()[i];
+			Set<Long> jobsInStatus = jobs.get(jobStatus);
+			if (jobsInStatus != null && jobsInStatus.size() != 0) {
+				sb.append(jobStatus).append("(").append(jobsInStatus.size()).append(") ");
+			}
+		}
+	}
+
+	protected void appendJobInStatusInfo(StringBuilder sb, JobStatus status, Set<Long> jobIds) {
+		if (jobIds == null)
+			return;
+		sb.append("Job status: ").append(status).append("\nJobs counter: ").append(jobIds.size()).append("\n");
+		boolean isFirstJob = true;
+		for (long id : jobIds) {
+			if (isFirstJob) {
+				isFirstJob = false;
+			} else {
+				sb.append(", ");
+			}
+			sb.append(id);
+		}
+		sb.append("\n\n");
 	}
 
 	public void setBrief(boolean brief) {
 		this.brief = brief;
+	}
+
+	public static class Builder extends AbstractCommandBuilder {
+
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams, CommandLine cmd)
+				throws ConnectionException {
+			JobListCommand command = new JobListCommand(cmdParams.getFrameworkQueueName());
+			command.setBrief(cmdParams.isBrief());
+			return command;
+		}
 	}
 }

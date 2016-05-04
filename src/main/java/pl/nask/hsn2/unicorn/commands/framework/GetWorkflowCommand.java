@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.commands.framework;
+
+import org.apache.commons.cli.CommandLine;
 
 import pl.nask.hsn2.protobuff.Workflows.WorkflowGetRequest;
+import pl.nask.hsn2.unicorn.CommandLineParams;
+import pl.nask.hsn2.unicorn.commands.AbstractCommandBuilder;
+import pl.nask.hsn2.unicorn.commands.BasicRPCCommand;
+import pl.nask.hsn2.unicorn.commands.Command;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 
 public class GetWorkflowCommand extends BasicRPCCommand {
-
 	private final static String REQUEST_TYPE = "WorkflowGetRequest";
 	private String workflowName;
 	private String revision;
@@ -41,5 +46,15 @@ public class GetWorkflowCommand extends BasicRPCCommand {
 					.setRevision(revision)
 					.build().toByteArray();
 	}
-
+	
+	public static class Builder extends AbstractCommandBuilder {
+		@Override
+		protected Command buildCommand(CommandLineParams cmdParams,
+				CommandLine cmd) throws ConnectionException {
+			String[] options = cmd.getOptionValues("gw");
+			String workflowName = options[0];
+			String revision = options.length > 1 ? options[1] : "";
+			return new GetWorkflowCommand(cmdParams.getFrameworkQueueName(), workflowName, revision);
+		}
+	}
 }

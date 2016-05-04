@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,21 +17,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.nask.hsn2.unicorn.commands;
+package pl.nask.hsn2.unicorn.connector;
 
-import pl.nask.hsn2.unicorn.connector.ConnectionException;
-import pl.nask.hsn2.unicorn.connector.Response;
+public class JobErrorException extends Exception {
+	private static final long serialVersionUID = 177240386079252888L;
 
-public class StreamMessagesCommand extends ListenCommand {
-
-	public StreamMessagesCommand(String queueName) {
-		super(queueName);
+	public JobErrorException() {
 	}
 
-	public void execute() throws ConnectionException {
-		while(true){
-			Response response = connector.receive();
-			LOGGER.info(response.toString());
-		}
+	public JobErrorException(String message) {
+		super(message);
+	}
+
+	public JobErrorException(Throwable cause) {
+		super(cause);
+	}
+
+	public JobErrorException(String message, Throwable cause) {
+		super(message, cause);
 	}
 }

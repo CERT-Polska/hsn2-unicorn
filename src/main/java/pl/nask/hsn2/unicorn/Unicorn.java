@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,10 +24,12 @@ import pl.nask.hsn2.unicorn.connector.ConnectionException;
 import pl.nask.hsn2.unicorn.connector.Connector;
 import pl.nask.hsn2.unicorn.connector.ConnectorImpl;
 
-public class Unicorn {
+public final class Unicorn {
 	private static Connector connector = null;
-
 	private static CommandLineParams cmdParams;
+
+	private Unicorn() {
+	}
 
 	/**
 	 * @param args

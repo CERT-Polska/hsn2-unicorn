@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,24 +19,22 @@
 
 package pl.nask.hsn2.unicorn.commands;
 
-import pl.nask.hsn2.protobuff.Info.InfoRequest;
-import pl.nask.hsn2.protobuff.Info.InfoType;
+import org.apache.commons.cli.CommandLine;
+
+import pl.nask.hsn2.unicorn.CommandLineParams;
 import pl.nask.hsn2.unicorn.connector.ConnectionException;
 
-public class JobInfoCommand extends BasicRPCCommand {
-
-	private final static String REQUEST_TYPE = "InfoRequest";
-	private Long jobId;
-
-	public JobInfoCommand(String queueName, Long jobId) throws ConnectionException {
-		super(REQUEST_TYPE, queueName);
-		this.jobId = jobId;
-	}
+public abstract class AbstractCommandBuilder implements CommandBuilder {
 
 	@Override
-	protected void buildMessage() {
-		InfoRequest infoRequest = InfoRequest.newBuilder().setType(InfoType.JOB).setId(jobId).build();
-		message = infoRequest.toByteArray();
+	public final Command build(CommandLineParams cmdParams) {
+		try {
+			return buildCommand(cmdParams, cmdParams.getCmd());
+		} catch (ConnectionException e) {
+			throw new IllegalStateException(e);
+		}
 	}
+
+	protected abstract Command buildCommand(CommandLineParams cmdParams, CommandLine cmd) throws ConnectionException;
 
 }

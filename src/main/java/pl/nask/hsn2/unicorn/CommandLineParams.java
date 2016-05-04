@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 public class CommandLineParams {
+	private static final String JOB_ID = "jobId";
 	private Options options = new Options();
 	private CommandLine cmd;
 	private String address = "127.0.0.1";
@@ -46,6 +47,12 @@ public class CommandLineParams {
 		OptionGroup optionGroup = new OptionGroup();
 		optionGroup.setRequired(true);
 
+		OptionBuilder.withArgName(JOB_ID);
+		OptionBuilder.withLongOpt("jobCancel");
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription("Job cancel");
+		optionGroup.addOption(OptionBuilder.create("jc"));
+		
 		OptionBuilder.withArgName("workflowName [serviceParams]");
 		OptionBuilder.withLongOpt("jobDescriptor");
 		OptionBuilder.hasArgs();
@@ -59,12 +66,18 @@ public class CommandLineParams {
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("Job descriptor flood");
 		optionGroup.addOption(OptionBuilder.create("jdf"));
-		
+
 		OptionBuilder.withLongOpt("jobList");
 		OptionBuilder.withDescription("Job list");
 		optionGroup.addOption(OptionBuilder.create("jl"));
+		
+		OptionBuilder.withLongOpt("jobListQuery");
+		OptionBuilder.withArgName("workflowName");
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription("List of jobs with the given workflow name");
+		optionGroup.addOption(OptionBuilder.create("jlq"));
 
-		OptionBuilder.withArgName("jobId");
+		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.withLongOpt("jobInfo");
 		OptionBuilder.hasArg();
 		OptionBuilder.withDescription("Job info");
@@ -80,6 +93,12 @@ public class CommandLineParams {
 		OptionBuilder.withValueSeparator(' ');
 		OptionBuilder.withDescription("get Workflow");
 		optionGroup.addOption(OptionBuilder.create("gw"));
+		
+		OptionBuilder.withArgName("workflowFilePath");
+		OptionBuilder.withLongOpt("uploadWorkflow");
+		OptionBuilder.hasArg();
+		OptionBuilder.withDescription("Uploads worklfow definition file");
+		optionGroup.addOption(OptionBuilder.create("uw"));
 
 		OptionBuilder.withLongOpt("getConfig");
 		OptionBuilder.withDescription("get config");
@@ -98,10 +117,10 @@ public class CommandLineParams {
 		OptionBuilder.withDescription("Print messages from queue without consuming");
 		optionGroup.addOption(OptionBuilder.create("gms"));
 
-		OptionBuilder.withArgName("queueName messagesNumber");
+		OptionBuilder.withArgName("queueName");
 		OptionBuilder.withLongOpt("streamMessage");
-		OptionBuilder.hasArg();
-		OptionBuilder.withDescription("get and print messages from queue");
+		OptionBuilder.hasArgs(1);
+		OptionBuilder.withDescription("Get and print all messages from queue. Listens in infinite loop.");
 		optionGroup.addOption(OptionBuilder.create("sm"));
 
 		OptionBuilder.withArgName("jobId objectId");
@@ -111,12 +130,12 @@ public class CommandLineParams {
 		OptionBuilder.withDescription("return object having the same jobId and objectId");
 		optionGroup.addOption(OptionBuilder.create("osg"));
 
-		OptionBuilder.withArgName("jobId");
+		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.hasArg();
 		OptionBuilder.withDescription("Make dump");
 		optionGroup.addOption(OptionBuilder.create("dump"));
 
-		OptionBuilder.withArgName("jobId");
+		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.withLongOpt("objectStoreQueryAll");
 		OptionBuilder.hasArg();
 		OptionBuilder.withDescription("Query for objectStore return ALL objects with jobId");
@@ -136,10 +155,11 @@ public class CommandLineParams {
 		OptionBuilder.withDescription("Query for objectStore return objects having the same jobId attribute named and value as given.");
 		optionGroup.addOption(OptionBuilder.create("osqv"));
 
-		OptionBuilder.withArgName("jobId");
+		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.withLongOpt("objectStoreJobClean");
 		OptionBuilder.hasArg();
-		OptionBuilder.withDescription("Sends JobFinished message. As a result of this msg ObjectStore will clean all data with given jobId.");
+		OptionBuilder
+				.withDescription("Sends JobFinished message. As a result of this msg ObjectStore will clean all data with given jobId.");
 		optionGroup.addOption(OptionBuilder.create("osjc"));
 
 		OptionBuilder.withLongOpt("help");
@@ -152,10 +172,18 @@ public class CommandLineParams {
 		OptionBuilder.withDescription("Import objects from file to os");
 		optionGroup.addOption(OptionBuilder.create("import"));
 
-		OptionBuilder.withArgName("jobId");
+		OptionBuilder.withArgName(JOB_ID);
 		OptionBuilder.hasArg();
 		OptionBuilder.withDescription("checking status of job");
 		optionGroup.addOption(OptionBuilder.create("status"));
+
+		OptionBuilder.withArgName("action[id|w] param count [interval]");
+		OptionBuilder.hasArgs();
+		OptionBuilder.withValueSeparator(' ');
+		OptionBuilder
+				.withDescription("When action type is 'id' it monitors job and starts new if it ends. When type is 'w' it starts new job, monitors it and starts new if it ends. Count defines how many time to repeat job. Time interval defines sleep between checks in seconds (10s if nothing provided).");
+		OptionBuilder.withLongOpt("jobDescriptorLooped");
+		optionGroup.addOption(OptionBuilder.create("jdl"));
 
 		options.addOptionGroup(optionGroup);
 

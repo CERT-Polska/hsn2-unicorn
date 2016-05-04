@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,13 @@ public class ObjectsDumper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ObjectsDumper.class);
 	private static final String DUMP_DIR = "dump";
 	static{
-		new File(DUMP_DIR).mkdir();
+		boolean result = new File(DUMP_DIR).mkdir();
+		if (!result) {
+			LOGGER.error("Can't create dump directory.");
+		}
+	}
+
+	private ObjectsDumper() {
 	}
 
 	public static String dumpToJsonFile(ObjectResponse receiveObjects){
@@ -54,8 +60,9 @@ public class ObjectsDumper {
 		try {
 			dumpFile.createNewFile();
 			output = new OutputStreamWriter(new FileOutputStream(dumpFile));
-			for(ObjectData ob : receiveObjects.getDataList())
+			for(ObjectData ob : receiveObjects.getDataList()) {
 				JsonFormat.print(ob, output);
+			}
 			return "Dump file " + fileName;
 		} catch (FileNotFoundException e) {
 			dumpFile.delete();

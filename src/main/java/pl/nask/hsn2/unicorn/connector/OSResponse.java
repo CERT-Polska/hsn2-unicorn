@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import pl.nask.hsn2.unicorn.FailedCommandException;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-public class OSResponse extends Response{
+public class OSResponse extends Response {
 	private ObjectResponse objectResponse;
 
 	private OSResponse(String type, String contentType, byte[] body) {
@@ -36,10 +36,10 @@ public class OSResponse extends Response{
 
 	public OSResponse(Response response) throws InvalidProtocolBufferException {
 		super(response.type, response.contentType, response.body);
-		objectResponse = ObjectResponse.parseFrom(body);
+		objectResponse = ObjectResponse.parseFrom(getBody());
 	}
 
-	public List<Long> getObjects() throws FailedCommandException{
+	public List<Long> getObjects() throws FailedCommandException {
 		checkNotFailure();
 		return objectResponse.getObjectsList();
 	}
@@ -49,8 +49,8 @@ public class OSResponse extends Response{
 		return objectResponse;
 	}
 
-	private void checkNotFailure() throws FailedCommandException{
-		if (ResponseType.FAILURE.equals(objectResponse.getType())){
+	private void checkNotFailure() throws FailedCommandException {
+		if (ResponseType.FAILURE.equals(objectResponse.getType())) {
 			throw new FailedCommandException("Responses type is FAILURE. " + objectResponse.getError());
 		}
 	}
